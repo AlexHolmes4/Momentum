@@ -1,6 +1,6 @@
 -- Momentum App — Supabase Schema
 -- Run this in your Supabase project's SQL Editor before starting the app.
--- Recommended region: ap-southeast-1 (Singapore — closest to Perth, Western Australia)
+-- Recommended region: ap-southeast-2 (Sydney — closest to Perth, Western Australia)
 
 create extension if not exists "pgcrypto";
 
