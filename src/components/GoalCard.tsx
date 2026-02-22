@@ -3,18 +3,21 @@ import { useState } from 'react'
 import { Goal } from '@/hooks/useGoals'
 import { GoalProgressBar } from '@/components/GoalProgressBar'
 import { EditGoalForm } from '@/components/EditGoalForm'
+import type { Task } from '@/hooks/useTasks'
 
 type Props = {
   goal: Goal
   progress: number // 0-100
+  linkedTasks?: Task[]
   onEdit?: (id: string, input: { title?: string; description?: string; target_date?: string }) => Promise<Goal>
   onDelete?: (id: string) => Promise<void>
   onArchive?: (id: string) => Promise<Goal>
 }
 
-export function GoalCard({ goal, progress, onEdit, onDelete, onArchive }: Props) {
+export function GoalCard({ goal, progress, linkedTasks, onEdit, onDelete, onArchive }: Props) {
   const [editing, setEditing] = useState(false)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [expanded, setExpanded] = useState(false)
 
   if (editing && onEdit) {
     return (
@@ -68,6 +71,41 @@ export function GoalCard({ goal, progress, onEdit, onDelete, onArchive }: Props)
         </div>
         <GoalProgressBar progress={progress} />
       </div>
+
+      {/* Linked tasks — expandable */}
+      {linkedTasks && linkedTasks.length > 0 && (
+        <div className="mt-3">
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="text-xs text-gray-500 hover:text-gray-300 transition-colors flex items-center gap-1"
+          >
+            <span className={`inline-block transition-transform ${expanded ? 'rotate-90' : ''}`}>&#9654;</span>
+            {linkedTasks.length} linked task{linkedTasks.length !== 1 ? 's' : ''}
+          </button>
+          {expanded && (
+            <ul className="mt-2 flex flex-col gap-1.5">
+              {linkedTasks.map(task => (
+                <li
+                  key={task.id}
+                  className="flex items-center gap-2 text-sm text-gray-400 pl-4"
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                    task.priority === 'high' ? 'bg-red-500' :
+                    task.priority === 'medium' ? 'bg-amber-400' :
+                    'bg-green-400'
+                  }`} />
+                  <span className="truncate">{task.title}</span>
+                  {task.due_date && (
+                    <span className="text-xs text-gray-600 shrink-0">
+                      {new Date(task.due_date).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       {/* Delete confirmation bar */}
       {confirmingDelete && (
