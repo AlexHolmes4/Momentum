@@ -1,13 +1,34 @@
 'use client'
+import { useState } from 'react'
 import { Goal } from '@/hooks/useGoals'
 import { GoalProgressBar } from '@/components/GoalProgressBar'
+import { EditGoalForm } from '@/components/EditGoalForm'
 
 type Props = {
   goal: Goal
   progress: number // 0-100
+  onEdit?: (id: string, input: { title?: string; description?: string; target_date?: string }) => Promise<Goal>
+  onDelete?: (id: string) => Promise<void>
+  onArchive?: (id: string) => Promise<Goal>
 }
 
-export function GoalCard({ goal, progress }: Props) {
+export function GoalCard({ goal, progress, onEdit, onDelete, onArchive }: Props) {
+  const [editing, setEditing] = useState(false)
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
+
+  if (editing && onEdit) {
+    return (
+      <EditGoalForm
+        goal={goal}
+        onSave={async (id, input) => {
+          await onEdit(id, input)
+          setEditing(false)
+        }}
+        onCancel={() => setEditing(false)}
+      />
+    )
+  }
+
   return (
     <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
       {/* Title + status badge */}
@@ -47,6 +68,59 @@ export function GoalCard({ goal, progress }: Props) {
         </div>
         <GoalProgressBar progress={progress} />
       </div>
+
+      {/* Delete confirmation bar */}
+      {confirmingDelete && (
+        <div className="flex items-center justify-between mt-4 px-3 py-2 bg-red-500/10 border border-red-500/30 rounded-lg">
+          <span className="text-sm text-red-400">Delete this goal?</span>
+          <div className="flex gap-2">
+            <button
+              onClick={async () => {
+                if (onDelete) await onDelete(goal.id)
+              }}
+              className="px-3 py-1 bg-red-600 hover:bg-red-500 text-white text-xs font-medium rounded-md transition-colors"
+            >
+              Confirm
+            </button>
+            <button
+              onClick={() => setConfirmingDelete(false)}
+              className="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-medium rounded-md transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Action buttons */}
+      {(onEdit || onDelete || onArchive) && !confirmingDelete && (
+        <div className="flex gap-3 mt-4 pt-3 border-t border-gray-800">
+          {onEdit && (
+            <button
+              onClick={() => setEditing(true)}
+              className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+            >
+              Edit
+            </button>
+          )}
+          {onArchive && (
+            <button
+              onClick={() => onArchive(goal.id)}
+              className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+            >
+              Archive
+            </button>
+          )}
+          {onDelete && (
+            <button
+              onClick={() => setConfirmingDelete(true)}
+              className="text-xs text-gray-500 hover:text-red-400 transition-colors"
+            >
+              Delete
+            </button>
+          )}
+        </div>
+      )}
     </div>
   )
 }

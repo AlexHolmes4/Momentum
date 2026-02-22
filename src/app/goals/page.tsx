@@ -5,7 +5,7 @@ import { GoalCard } from '@/components/GoalCard'
 import { CreateGoalForm } from '@/components/CreateGoalForm'
 
 export default function GoalsPage() {
-  const { goals, loading, error, createGoal } = useGoals()
+  const { goals, loading, error, createGoal, updateGoal, deleteGoal, archiveGoal } = useGoals()
   const [showForm, setShowForm] = useState(false)
 
   return (
@@ -61,7 +61,13 @@ export default function GoalsPage() {
         <ul className="flex flex-col gap-4">
           {goals.map(goal => (
             <li key={goal.id}>
-              <GoalCard goal={goal} progress={0} />
+              <GoalCard
+                goal={goal}
+                progress={0}
+                onEdit={updateGoal}
+                onDelete={deleteGoal}
+                onArchive={archiveGoal}
+              />
             </li>
           ))}
         </ul>
