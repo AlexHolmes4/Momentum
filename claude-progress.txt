@@ -27,3 +27,22 @@ NOTES:
 NEXT:
   Session 2: implement F006 (useGoals hook) + F007 (goalHelpers) + F008 (Goals list view)
 ---
+
+---
+[Session 2 — Goals Foundation — 2026-02-22]
+STATUS: Complete
+COMPLETED:
+  - F006: src/hooks/useGoals.ts — useGoals hook with goals, loading, error, createGoal, updateGoal, deleteGoal, archiveGoal, refetch
+  - F007: src/lib/goalHelpers.ts — calculateProgress(tasks: Task[]): number pure function (0-100, returns 0 for no tasks)
+  - F008: src/app/goals/page.tsx — Goals list view using useGoals, with loading/error/empty states and goal cards
+  - Added .claude/launch.json for preview_start dev server (cmd /c npm run dev, port 3000)
+VERIFIED:
+  - npm run build passes cleanly (zero TypeScript errors, /goals generates as static page)
+  - Goals page renders at localhost:3000/goals — dark mode, sidebar, empty state confirmed in browser
+  - useGoals connects to Supabase and correctly returns empty list for fresh DB
+NOTES:
+  - .claude/launch.json uses cmd /c npm run dev (Windows requires this vs plain npm)
+  - Goals nav active-highlight relies on pathname === '/goals' (Next.js normalises trailing slash)
+NEXT:
+  Session 3: implement F009 (GoalProgressBar component) + F010 (GoalCard component) + F011 (Create goal form)
+---
