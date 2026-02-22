@@ -13,6 +13,10 @@
 // MCP Hook: Claude can trigger this via Supabase MCP + a webhook, or directly
 // by calling this endpoint when deployed with Workers runtime.
 
+// Required for static export compatibility — generates a static JSON file at build time.
+// Remove this line when switching to @cloudflare/next-on-pages server runtime.
+export const dynamic = 'force-static'
+
 export async function GET() {
   // TODO: fetch from Supabase and build real summary
   const summary = {
