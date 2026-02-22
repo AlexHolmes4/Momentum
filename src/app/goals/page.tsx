@@ -1,12 +1,34 @@
 'use client'
+import { useState } from 'react'
 import { useGoals } from '@/hooks/useGoals'
+import { GoalCard } from '@/components/GoalCard'
+import { CreateGoalForm } from '@/components/CreateGoalForm'
 
 export default function GoalsPage() {
-  const { goals, loading, error } = useGoals()
+  const { goals, loading, error, createGoal } = useGoals()
+  const [showForm, setShowForm] = useState(false)
 
   return (
     <div className="max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold text-white mb-6">Goals</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-white">Goals</h1>
+        {!showForm && (
+          <button
+            onClick={() => setShowForm(true)}
+            className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg transition-colors"
+          >
+            + Add Goal
+          </button>
+        )}
+      </div>
+
+      {showForm && (
+        <CreateGoalForm
+          createGoal={createGoal}
+          onCreated={() => setShowForm(false)}
+          onCancel={() => setShowForm(false)}
+        />
+      )}
 
       {/* Loading state */}
       {loading && (
@@ -27,7 +49,7 @@ export default function GoalsPage() {
       )}
 
       {/* Empty state */}
-      {!loading && !error && goals.length === 0 && (
+      {!loading && !error && goals.length === 0 && !showForm && (
         <div className="text-center py-16 text-gray-500">
           <p className="text-lg font-medium mb-1">No active goals yet</p>
           <p className="text-sm">Add your first goal to get started.</p>
@@ -38,38 +60,8 @@ export default function GoalsPage() {
       {!loading && !error && goals.length > 0 && (
         <ul className="flex flex-col gap-4">
           {goals.map(goal => (
-            <li
-              key={goal.id}
-              className="bg-gray-900 border border-gray-800 rounded-xl p-5"
-            >
-              {/* Title + status badge */}
-              <div className="flex items-start justify-between gap-4 mb-1">
-                <h2 className="text-white font-semibold text-base leading-snug">
-                  {goal.title}
-                </h2>
-                <span className="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
-                  {goal.status}
-                </span>
-              </div>
-
-              {/* Description */}
-              {goal.description && (
-                <p className="text-gray-400 text-sm mb-3">{goal.description}</p>
-              )}
-
-              {/* Target date */}
-              {goal.target_date && (
-                <p className="text-xs text-gray-500">
-                  Target:{' '}
-                  <span className="text-gray-300">
-                    {new Date(goal.target_date).toLocaleDateString('en-AU', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric',
-                    })}
-                  </span>
-                </p>
-              )}
+            <li key={goal.id}>
+              <GoalCard goal={goal} progress={0} />
             </li>
           ))}
         </ul>
