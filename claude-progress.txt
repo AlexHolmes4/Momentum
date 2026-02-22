@@ -46,3 +46,23 @@ NOTES:
 NEXT:
   Session 3: implement F009 (GoalProgressBar component) + F010 (GoalCard component) + F011 (Create goal form)
 ---
+
+---
+[Session 3 — Goal Components — 2026-02-22]
+STATUS: Complete
+COMPLETED:
+  - F009: src/components/GoalProgressBar.tsx — 0-100 prop, indigo fill, clamped to valid range
+  - F010: src/components/GoalCard.tsx — title, description, target date, status badge, GoalProgressBar
+  - F011: src/components/CreateGoalForm.tsx — inline form, title required, description + target_date optional, error state, calls useGoals.createGoal
+  - Refactored src/app/goals/page.tsx to use GoalCard + CreateGoalForm; Add Goal button toggles form inline
+VERIFIED:
+  - npm run build passes cleanly (all static routes including /goals)
+  - Goals page structural check via preview_snapshot: heading, Add Goal button, empty state all confirmed
+  - User confirmed app visible at localhost:3000 via Preview button
+NOTES:
+  - GoalCard progress prop hardcoded to 0 — will receive calculated value once useTasks is built (F016+)
+  - CreateGoalForm receives createGoal as prop from page to avoid double-invoking useGoals
+  - preview_screenshot hangs in this environment — use preview_snapshot for structure checks
+NEXT:
+  Session 4: implement F012 (Edit goal), F013 (Delete goal), F014 (Archive goal)
+---
