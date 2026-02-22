@@ -66,3 +66,26 @@ NOTES:
 NEXT:
   Session 4: implement F012 (Edit goal), F013 (Delete goal), F014 (Archive goal)
 ---
+
+---
+[Session 4 — Goal Actions — 2026-02-22]
+STATUS: Complete
+COMPLETED:
+  - F012: src/components/EditGoalForm.tsx — pre-populated inline form (title, description, target_date), calls useGoals.updateGoal via onSave prop
+  - F013: Delete goal — inline confirmation bar ("Delete this goal?" + Confirm/Cancel) in GoalCard, calls useGoals.deleteGoal
+  - F014: Archive goal — Archive button in GoalCard, calls useGoals.archiveGoal, removes goal from active list
+  - Enhanced src/components/GoalCard.tsx — added Edit/Archive/Delete action buttons, edit mode (renders EditGoalForm inline), delete confirmation state
+  - Updated src/app/goals/page.tsx — passes updateGoal, deleteGoal, archiveGoal callbacks to GoalCard
+VERIFIED:
+  - npm run build passes cleanly (zero TypeScript errors, all static routes)
+  - GoalCard renders Edit, Archive, Delete buttons (preview_snapshot confirmed)
+  - Edit mode shows EditGoalForm with pre-populated title + description fields
+  - Delete shows inline confirmation bar with Confirm/Cancel
+  - Archive removes goal from active list immediately (goal set to 'archived' in Supabase)
+NOTES:
+  - EditGoalForm onSave typed as Promise<unknown> to avoid return-type mismatch with wrapper
+  - GoalCard action buttons only render when corresponding callback props are provided
+  - Archive has no confirmation (reversible action); Delete has inline confirmation
+NEXT:
+  Session 5: implement F015 (View linked tasks per goal), F016 (useTasks hook), F017 (taskHelpers)
+---
