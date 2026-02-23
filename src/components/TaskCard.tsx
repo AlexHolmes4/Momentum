@@ -21,14 +21,13 @@ type Props = {
 
 export function TaskCard({ task, goalTitle, goals, onEdit, onDelete, onComplete }: Props) {
   const [editing, setEditing] = useState(false)
-  const [confirmingDelete, setConfirmingDelete] = useState(false)
-  const [confirmingComplete, setConfirmingComplete] = useState(false)
+  const [confirming, setConfirming] = useState<'none' | 'complete' | 'delete'>('none')
 
-  if (editing && onEdit && goals) {
+  if (editing && onEdit) {
     return (
       <EditTaskForm
         task={task}
-        goals={goals}
+        goals={goals ?? []}
         onSave={async (id, input) => {
           await onEdit(id, input)
           setEditing(false)
@@ -82,7 +81,7 @@ export function TaskCard({ task, goalTitle, goals, onEdit, onDelete, onComplete 
       )}
 
       {/* Complete confirmation bar */}
-      {confirmingComplete && (
+      {confirming === 'complete' && (
         <div className="flex items-center justify-between mt-4 px-3 py-2 bg-green-500/10 border border-green-500/30 rounded-lg">
           <span className="text-sm text-green-400">Mark task complete?</span>
           <div className="flex gap-2">
@@ -95,7 +94,7 @@ export function TaskCard({ task, goalTitle, goals, onEdit, onDelete, onComplete 
               Confirm
             </button>
             <button
-              onClick={() => setConfirmingComplete(false)}
+              onClick={() => setConfirming('none')}
               className="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-medium rounded-md transition-colors"
             >
               Cancel
@@ -105,7 +104,7 @@ export function TaskCard({ task, goalTitle, goals, onEdit, onDelete, onComplete 
       )}
 
       {/* Delete confirmation bar */}
-      {confirmingDelete && !confirmingComplete && (
+      {confirming === 'delete' && (
         <div className="flex items-center justify-between mt-4 px-3 py-2 bg-red-500/10 border border-red-500/30 rounded-lg">
           <span className="text-sm text-red-400">Delete this task?</span>
           <div className="flex gap-2">
@@ -118,7 +117,7 @@ export function TaskCard({ task, goalTitle, goals, onEdit, onDelete, onComplete 
               Confirm
             </button>
             <button
-              onClick={() => setConfirmingDelete(false)}
+              onClick={() => setConfirming('none')}
               className="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-medium rounded-md transition-colors"
             >
               Cancel
@@ -128,11 +127,11 @@ export function TaskCard({ task, goalTitle, goals, onEdit, onDelete, onComplete 
       )}
 
       {/* Action buttons */}
-      {(onEdit || onDelete || onComplete) && !confirmingDelete && !confirmingComplete && (
+      {(onEdit || onDelete || onComplete) && confirming === 'none' && (
         <div className="flex gap-3 mt-4 pt-3 border-t border-gray-800">
           {onComplete && (
             <button
-              onClick={() => setConfirmingComplete(true)}
+              onClick={() => setConfirming('complete')}
               className="text-xs text-gray-500 hover:text-green-400 transition-colors"
             >
               Complete
@@ -148,7 +147,7 @@ export function TaskCard({ task, goalTitle, goals, onEdit, onDelete, onComplete 
           )}
           {onDelete && (
             <button
-              onClick={() => setConfirmingDelete(true)}
+              onClick={() => setConfirming('delete')}
               className="text-xs text-gray-500 hover:text-red-400 transition-colors"
             >
               Delete
