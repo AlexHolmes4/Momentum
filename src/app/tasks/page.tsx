@@ -1,28 +1,47 @@
 'use client'
-import { useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { useTasks } from '@/hooks/useTasks'
 import { useGoals } from '@/hooks/useGoals'
 import { sortTasks } from '@/lib/taskHelpers'
 import { TaskCard } from '@/components/TaskCard'
+import { CreateTaskForm } from '@/components/CreateTaskForm'
 
 export default function TasksPage() {
-  const { tasks, loading, error } = useTasks()
+  const { tasks, loading, error, createTask, updateTask, deleteTask, completeTask } = useTasks()
   const { goals } = useGoals()
+  const [showForm, setShowForm] = useState(false)
 
-  // Build goal name lookup: id → title
+  // Build goal name lookup: id -> title
   const goalMap = useMemo(
     () => Object.fromEntries(goals.map(g => [g.id, g.title])),
     [goals]
   )
 
-  // Default sort: priority (high → medium → low)
+  // Default sort: priority (high -> medium -> low)
   const sorted = useMemo(() => sortTasks(tasks, 'priority'), [tasks])
 
   return (
     <div className="max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-white">Tasks</h1>
+        {!showForm && (
+          <button
+            onClick={() => setShowForm(true)}
+            className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg transition-colors"
+          >
+            + Add Task
+          </button>
+        )}
       </div>
+
+      {showForm && (
+        <CreateTaskForm
+          createTask={createTask}
+          goals={goals}
+          onCreated={() => setShowForm(false)}
+          onCancel={() => setShowForm(false)}
+        />
+      )}
 
       {/* Loading state */}
       {loading && (
@@ -31,7 +50,7 @@ export default function TasksPage() {
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
           </svg>
-          Loading tasks…
+          Loading tasks...
         </div>
       )}
 
@@ -43,7 +62,7 @@ export default function TasksPage() {
       )}
 
       {/* Empty state */}
-      {!loading && !error && tasks.length === 0 && (
+      {!loading && !error && tasks.length === 0 && !showForm && (
         <div className="text-center py-16 text-gray-500">
           <p className="text-lg font-medium mb-1">No active tasks yet</p>
           <p className="text-sm">Create your first task to get started.</p>
@@ -58,6 +77,10 @@ export default function TasksPage() {
               <TaskCard
                 task={task}
                 goalTitle={task.goal_id ? goalMap[task.goal_id] : undefined}
+                goals={goals}
+                onEdit={updateTask}
+                onDelete={deleteTask}
+                onComplete={completeTask}
               />
             </li>
           ))}
