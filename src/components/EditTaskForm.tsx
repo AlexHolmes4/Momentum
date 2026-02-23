@@ -1,7 +1,6 @@
 'use client'
 import { useState, FormEvent } from 'react'
-import type { Task } from '@/hooks/useTasks'
-import type { UpdateTaskInput } from '@/hooks/useTasks'
+import type { Task, UpdateTaskInput } from '@/hooks/useTasks'
 import type { Goal } from '@/hooks/useGoals'
 
 type Props = {
