@@ -128,3 +128,26 @@ NOTES:
 NEXT:
   Session 7: F021 (Create task form), F022 (Edit task), F023 (Complete task), F024 (Delete task)
 ---
+
+---
+[Session 7 — Task Actions — 2026-02-23]
+STATUS: Complete
+COMPLETED:
+  - F021: src/components/CreateTaskForm.tsx — title (required), priority dropdown (default medium), due_date, category, goal_id select
+  - F022: src/components/EditTaskForm.tsx — pre-populated edit form, inline in TaskCard edit mode
+  - F023: Complete task — inline green confirmation bar "Mark task complete?", calls completeTask (archive + delete)
+  - F024: Delete task — inline red confirmation bar "Delete this task?", calls deleteTask
+  - Enhanced TaskCard with onEdit/onDelete/onComplete props, enum confirming state, edit/complete/delete flows
+  - Wired Tasks page with + Add Task button, CreateTaskForm toggle, all CRUD callbacks passed to TaskCards
+  - Exported CreateTaskInput and UpdateTaskInput from useTasks.ts; removed duplicate local type from CreateTaskForm
+VERIFIED:
+  - npx tsc --noEmit passes (zero errors)
+  - npm test passes (11 taskHelpers tests, no regressions)
+  - Tasks page renders "+ Add Task" button and CreateTaskForm with all fields
+NOTES:
+  - TaskCard uses enum confirming: 'none' | 'complete' | 'delete' (not two booleans) for mutual exclusion
+  - Edit mode uses goals ?? [] fallback so form always renders if onEdit present
+  - Async confirm buttons (complete/delete) have no error feedback — pre-existing pattern from GoalCard, tracked for future polish
+NEXT:
+  Session 8: F025-F029 (SubtaskList, add/complete subtasks, lazy load on expand, all-done prompt)
+---
