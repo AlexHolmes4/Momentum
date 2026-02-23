@@ -14,7 +14,7 @@ export type Task = {
   created_at: string
 }
 
-type CreateTaskInput = {
+export type CreateTaskInput = {
   title: string
   priority?: 'high' | 'medium' | 'low'
   due_date?: string
@@ -22,7 +22,7 @@ type CreateTaskInput = {
   goal_id?: string | null
 }
 
-type UpdateTaskInput = {
+export type UpdateTaskInput = {
   title?: string
   priority?: 'high' | 'medium' | 'low'
   due_date?: string | null
