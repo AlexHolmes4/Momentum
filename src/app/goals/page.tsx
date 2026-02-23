@@ -3,9 +3,13 @@ import { useState } from 'react'
 import { useGoals } from '@/hooks/useGoals'
 import { GoalCard } from '@/components/GoalCard'
 import { CreateGoalForm } from '@/components/CreateGoalForm'
+import { useTasks } from '@/hooks/useTasks'
+import { calculateProgress } from '@/lib/goalHelpers'
+import type { Task as GoalTask } from '@/lib/goalHelpers'
 
 export default function GoalsPage() {
   const { goals, loading, error, createGoal, updateGoal, deleteGoal, archiveGoal } = useGoals()
+  const { tasks } = useTasks()
   const [showForm, setShowForm] = useState(false)
 
   return (
@@ -59,17 +63,22 @@ export default function GoalsPage() {
       {/* Goals list */}
       {!loading && !error && goals.length > 0 && (
         <ul className="flex flex-col gap-4">
-          {goals.map(goal => (
-            <li key={goal.id}>
-              <GoalCard
-                goal={goal}
-                progress={0}
-                onEdit={updateGoal}
-                onDelete={deleteGoal}
-                onArchive={archiveGoal}
-              />
-            </li>
-          ))}
+          {goals.map(goal => {
+            const linkedTasks = tasks.filter(t => t.goal_id === goal.id)
+            const progress = calculateProgress(linkedTasks as GoalTask[])
+            return (
+              <li key={goal.id}>
+                <GoalCard
+                  goal={goal}
+                  progress={progress}
+                  linkedTasks={linkedTasks}
+                  onEdit={updateGoal}
+                  onDelete={deleteGoal}
+                  onArchive={archiveGoal}
+                />
+              </li>
+            )
+          })}
         </ul>
       )}
     </div>

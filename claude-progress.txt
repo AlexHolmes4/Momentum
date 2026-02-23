@@ -89,3 +89,23 @@ NOTES:
 NEXT:
   Session 5: implement F015 (View linked tasks per goal), F016 (useTasks hook), F017 (taskHelpers)
 ---
+
+---
+[Session 5 — Tasks Foundation — 2026-02-22]
+STATUS: Complete
+COMPLETED:
+  - F017: src/lib/taskHelpers.ts — filterTasks (priority/category/goalId/search, AND logic) + sortTasks (priority/due_date/created_at) with full Vitest test suite (11 tests)
+  - F016: src/hooks/useTasks.ts — useTasks hook (fetchTasks, createTask, updateTask, deleteTask, completeTask with archive flow)
+  - F015: Expanded GoalCard to show linked tasks with priority dots + due dates; Goals page now computes live progress via calculateProgress
+  - Added Vitest with vitest.config.ts and npm test script
+VERIFIED:
+  - All 11 taskHelpers unit tests pass (npm test)
+  - npm run build passes cleanly
+  - Goals page renders live progress bars and expandable linked tasks (verified via preview_snapshot)
+NOTES:
+  - Task type defined in both goalHelpers.ts and useTasks.ts (structurally identical) — cast used in goals/page.tsx
+  - completeTask does INSERT into archived_tasks + DELETE from tasks (two-step operation)
+  - Vitest config uses path alias @/ matching tsconfig.json
+NEXT:
+  Session 6: F018 (Tasks list view), F019 (TaskCard component), F020 (priority color coding)
+---
