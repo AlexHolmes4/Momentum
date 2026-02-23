@@ -109,3 +109,22 @@ NOTES:
 NEXT:
   Session 6: F018 (Tasks list view), F019 (TaskCard component), F020 (priority color coding)
 ---
+
+---
+[Session 6 — Tasks Display — 2026-02-23]
+STATUS: Complete
+COMPLETED:
+  - F019+F020: src/components/TaskCard.tsx — title, priority badge (red/amber/green), due date, category pill, goal link label
+  - F018: src/app/tasks/page.tsx — full task list with useTasks, useGoals for name resolution, sortTasks priority default, loading/error/empty states
+VERIFIED:
+  - npm run build passes cleanly
+  - npm test passes (11 taskHelpers tests, no regressions)
+  - Tasks page renders at localhost:3000/tasks with correct structure
+  - Priority badges show correct color coding per CLAUDE.md conventions
+NOTES:
+  - TaskCard is read-only — action buttons (complete/edit/delete) come in F021-F024
+  - Goal name resolution is page-level (goalMap from useGoals), not per-card queries
+  - Task type imported from useTasks hook (structurally identical to goalHelpers Task type)
+NEXT:
+  Session 7: F021 (Create task form), F022 (Edit task), F023 (Complete task), F024 (Delete task)
+---
