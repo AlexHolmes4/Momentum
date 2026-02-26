@@ -3,6 +3,7 @@ import { useState } from 'react'
 import type { Task, UpdateTaskInput } from '@/hooks/useTasks'
 import type { Goal } from '@/hooks/useGoals'
 import { EditTaskForm } from '@/components/EditTaskForm'
+import { SubtaskListContainer } from '@/components/SubtaskListContainer'
 
 const PRIORITY_STYLES: Record<string, string> = {
   high:   'text-red-500 bg-red-500/10 border-red-500/20',
@@ -22,6 +23,7 @@ type Props = {
 export function TaskCard({ task, goalTitle, goals, onEdit, onDelete, onComplete }: Props) {
   const [editing, setEditing] = useState(false)
   const [confirming, setConfirming] = useState<'none' | 'complete' | 'delete'>('none')
+  const [expanded, setExpanded] = useState(false)
 
   if (editing && onEdit) {
     return (
@@ -78,6 +80,23 @@ export function TaskCard({ task, goalTitle, goals, onEdit, onDelete, onComplete 
             </span>
           )}
         </div>
+      )}
+
+      {/* Subtasks toggle */}
+      <button
+        onClick={() => setExpanded(prev => !prev)}
+        className="flex items-center gap-1.5 mt-3 text-xs text-gray-500 hover:text-gray-300 transition-colors"
+      >
+        <span className="text-[10px]">{expanded ? '▼' : '▶'}</span>
+        Subtasks
+      </button>
+
+      {/* Subtask list — mounted only when expanded (lazy load F028) */}
+      {expanded && (
+        <SubtaskListContainer
+          taskId={task.id}
+          onAllComplete={() => setConfirming('complete')}
+        />
       )}
 
       {/* Complete confirmation bar */}
