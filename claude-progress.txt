@@ -151,3 +151,32 @@ NOTES:
 NEXT:
   Session 8: F025-F029 (SubtaskList, add/complete subtasks, lazy load on expand, all-done prompt)
 ---
+
+---
+[Session 8 — Subtasks — 2026-02-26]
+STATUS: Complete
+COMPLETED:
+  - F025: src/components/SubtaskList.tsx — dumb component: checkbox list, loading/empty states, add input
+  - F026: Inline "Add a subtask..." input with Enter key support, disabled while adding, clears on success
+  - F027: Checkbox toggle calls onToggle → useSubtasks.toggleSubtask → Supabase update
+  - F028: Lazy load via conditional mount — SubtaskListContainer only renders when TaskCard expanded
+  - F029: All-done prompt — when all subtasks checked, triggers green "Mark task complete?" confirmation bar
+  - src/hooks/useSubtasks.ts — useSubtasks(taskId) hook: fetch, add, toggle, delete subtasks
+  - src/components/SubtaskListContainer.tsx — smart wrapper calling useSubtasks, passes props to SubtaskList
+  - src/components/TaskCard.tsx — added expanded state, subtask toggle, SubtaskListContainer mount
+  - Subtask toggle + list hidden during confirmation flows (complete/delete) to prevent confusing UX
+  - Added aria-expanded attribute to subtask toggle button
+VERIFIED:
+  - npm run build passes cleanly (8/8 routes, zero errors)
+  - npm test passes (11 taskHelpers tests, no regressions)
+  - npx tsc --noEmit clean at every step
+  - Tasks page renders at localhost:3000/tasks without console errors
+  - Code reviewed: spec compliance + code quality for Tasks 2, 3, 5
+NOTES:
+  - Architecture: Approach B — separate useSubtasks hook + dumb SubtaskList + SubtaskListContainer
+  - UUID ordering for subtasks is stable but not strictly chronological (schema improvement deferred)
+  - Subtask state lost on collapse/re-expand (re-fetches from Supabase — acceptable, ensures fresh data)
+  - No subtask delete UI in this session (hook method exists for future use)
+NEXT:
+  Session 9: F030-F034 (Dashboard scaffold, today's tasks, overdue tasks, goal progress overview, quick-add)
+---
