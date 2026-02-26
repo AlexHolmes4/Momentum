@@ -82,17 +82,20 @@ export function TaskCard({ task, goalTitle, goals, onEdit, onDelete, onComplete 
         </div>
       )}
 
-      {/* Subtasks toggle */}
-      <button
-        onClick={() => setExpanded(prev => !prev)}
-        className="flex items-center gap-1.5 mt-3 text-xs text-gray-500 hover:text-gray-300 transition-colors"
-      >
-        <span className="text-[10px]">{expanded ? '▼' : '▶'}</span>
-        Subtasks
-      </button>
+      {/* Subtasks toggle — hidden during confirmation flows */}
+      {confirming === 'none' && (
+        <button
+          onClick={() => setExpanded(prev => !prev)}
+          aria-expanded={expanded}
+          className="flex items-center gap-1.5 mt-3 text-xs text-gray-500 hover:text-gray-300 transition-colors"
+        >
+          <span className="text-[10px]">{expanded ? '▼' : '▶'}</span>
+          Subtasks
+        </button>
+      )}
 
       {/* Subtask list — mounted only when expanded (lazy load F028) */}
-      {expanded && (
+      {confirming === 'none' && expanded && (
         <SubtaskListContainer
           taskId={task.id}
           onAllComplete={() => setConfirming('complete')}
