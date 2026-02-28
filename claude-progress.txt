@@ -180,3 +180,32 @@ NOTES:
 NEXT:
   Session 9: F030-F034 (Dashboard scaffold, today's tasks, overdue tasks, goal progress overview, quick-add)
 ---
+
+---
+[Session 9 — Dashboard — 2026-02-28]
+STATUS: Complete
+COMPLETED:
+  - F030: src/app/dashboard/page.tsx — Dashboard scaffold with 3 sections (Overdue, Today, Goals)
+  - F031: Today's tasks section — filters tasks where due_date === today, full actionable TaskCard
+  - F032: Overdue tasks section — filters tasks where due_date < today, red count badge, full actionable TaskCard
+  - F033: Goals overview section — all active goals with GoalProgressBar, progress %, target date
+  - F034: Quick-add task form — inline collapsible form (title + priority + due date), calls createTask
+VERIFIED:
+  - npm run build passes (zero errors, 8/8 static routes)
+  - npm test passes (11 taskHelpers tests, no regressions)
+  - npx tsc --noEmit clean
+  - Dashboard renders all 3 sections at localhost:3000/dashboard
+  - Quick-add form renders with Title, Priority, Due date fields
+  - TaskCards fully actionable (complete/edit/delete) from Dashboard
+  - Code reviewed: spec compliance (passed) + code quality (approved with notes)
+NOTES:
+  - Single page component with client-side date filtering (useMemo)
+  - today computed once via useMemo (YYYY-MM-DD string comparison)
+  - Tasks without due_date appear on Tasks page only, not on Dashboard
+  - Goal progress calculated from live task list (same pattern as Goals page)
+  - Accessibility fixes applied: htmlFor/id on form labels, aria-hidden on spinner SVG
+  - Cancel button resets all form fields for consistency with submit path
+  - Known limitation: goal progress always 0% (pre-existing — active tasks only, completed tasks archived)
+NEXT:
+  Session 10: F035-F040 (FilterBar, filter by priority/goal/date/category, search)
+---
