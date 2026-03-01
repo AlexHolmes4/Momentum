@@ -209,3 +209,30 @@ NOTES:
 NEXT:
   Session 10: F035-F040 (FilterBar, filter by priority/goal/date/category, search)
 ---
+
+---
+[Session 10 — Filter & Search — 2026-03-01]
+STATUS: Complete
+COMPLETED:
+  - F035: src/components/FilterBar.tsx — controlled component with search + 4 dropdown filters + Clear all
+  - F036: Filter by priority — dropdown in FilterBar, wired through filterTasks
+  - F037: Filter by goal — dropdown in FilterBar, populated from useGoals, wired through filterTasks
+  - F038: Filter by due date — dropdown (today/this week/overdue), new dueDateRange field in taskHelpers
+  - F039: Filter by category — dropdown in FilterBar, categories extracted dynamically from tasks
+  - F040: Search — FilterBar search input on Tasks page + standalone search input on Goals page (title+description)
+VERIFIED:
+  - npm run build passes (zero errors, all static routes)
+  - npm test passes (16 tests — 11 existing + 5 new due-date filter tests)
+  - npx tsc --noEmit clean
+  - FilterBar renders on Tasks page with all controls
+  - Goals page search filters goals by title/description
+NOTES:
+  - filterTasks now accepts optional `today` parameter (3rd arg) for pure due-date filtering
+  - UTC-safe date arithmetic (getUTCDay/setUTCDate) avoids timezone bugs
+  - This-week = Monday through Sunday of the current week
+  - Categories extracted dynamically: [...new Set(tasks.map(t => t.category))]
+  - Goals search filters by title AND description (case-insensitive)
+  - "No tasks match your filters" / "No goals match your search" empty states added
+NEXT:
+  Session 11: F041-F044 (useArchive hook, Archive view, archived tasks list, archived goals list)
+---
