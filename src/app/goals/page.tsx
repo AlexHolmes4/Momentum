@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useGoals } from '@/hooks/useGoals'
 import { GoalCard } from '@/components/GoalCard'
 import { CreateGoalForm } from '@/components/CreateGoalForm'
@@ -11,6 +11,16 @@ export default function GoalsPage() {
   const { goals, loading, error, createGoal, updateGoal, deleteGoal, archiveGoal } = useGoals()
   const { tasks } = useTasks()
   const [showForm, setShowForm] = useState(false)
+  const [search, setSearch] = useState('')
+
+  const filteredGoals = useMemo(() => {
+    if (!search.trim()) return goals
+    const term = search.toLowerCase()
+    return goals.filter(g =>
+      g.title.toLowerCase().includes(term) ||
+      (g.description && g.description.toLowerCase().includes(term))
+    )
+  }, [goals, search])
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -24,6 +34,17 @@ export default function GoalsPage() {
             + Add Goal
           </button>
         )}
+      </div>
+
+      {/* Search */}
+      <div className="mb-6">
+        <input
+          type="text"
+          placeholder="Search goals..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="bg-gray-800 text-white text-sm rounded-lg px-3 py-1.5 placeholder-gray-500 border border-gray-700 focus:border-indigo-500 focus:outline-none w-full max-w-xs"
+        />
       </div>
 
       {showForm && (
@@ -60,10 +81,17 @@ export default function GoalsPage() {
         </div>
       )}
 
+      {/* No search results */}
+      {!loading && !error && goals.length > 0 && filteredGoals.length === 0 && (
+        <div className="text-center py-12 text-gray-500">
+          <p className="text-sm">No goals match your search.</p>
+        </div>
+      )}
+
       {/* Goals list */}
-      {!loading && !error && goals.length > 0 && (
+      {!loading && !error && filteredGoals.length > 0 && (
         <ul className="flex flex-col gap-4">
-          {goals.map(goal => {
+          {filteredGoals.map(goal => {
             const linkedTasks = tasks.filter(t => t.goal_id === goal.id)
             const progress = calculateProgress(linkedTasks as GoalTask[])
             return (
