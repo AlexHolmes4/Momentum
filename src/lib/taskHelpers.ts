@@ -9,6 +9,7 @@ export type TaskFilters = {
   category?: string
   goalId?: string
   search?: string
+  dueDateRange?: 'today' | 'this_week' | 'overdue'
 }
 
 export type TaskSort = 'priority' | 'due_date' | 'created_at'
@@ -19,7 +20,7 @@ const PRIORITY_ORDER: Record<string, number> = { high: 0, medium: 1, low: 2 }
  * Filter tasks by one or more criteria (AND logic).
  * Returns a new array — does not mutate the input.
  */
-export function filterTasks(tasks: Task[], filters: TaskFilters): Task[] {
+export function filterTasks(tasks: Task[], filters: TaskFilters, today?: string): Task[] {
   return tasks.filter(task => {
     if (filters.priority && task.priority !== filters.priority) return false
     if (filters.category && task.category !== filters.category) return false
@@ -27,6 +28,28 @@ export function filterTasks(tasks: Task[], filters: TaskFilters): Task[] {
     if (filters.search) {
       const term = filters.search.toLowerCase()
       if (!task.title.toLowerCase().includes(term)) return false
+    }
+    if (filters.dueDateRange) {
+      if (!task.due_date) return false
+      const todayStr = today ?? new Date().toISOString().slice(0, 10)
+      switch (filters.dueDateRange) {
+        case 'today':
+          if (task.due_date !== todayStr) return false
+          break
+        case 'overdue':
+          if (task.due_date >= todayStr) return false
+          break
+        case 'this_week': {
+          const d = new Date(todayStr + 'T00:00:00Z')
+          const dayOfWeek = d.getUTCDay() // 0=Sun,1=Mon,...,6=Sat
+          const daysUntilSunday = dayOfWeek === 0 ? 0 : 7 - dayOfWeek
+          const endOfWeek = new Date(d)
+          endOfWeek.setUTCDate(d.getUTCDate() + daysUntilSunday)
+          const endStr = endOfWeek.toISOString().slice(0, 10)
+          if (task.due_date < todayStr || task.due_date > endStr) return false
+          break
+        }
+      }
     }
     return true
   })
