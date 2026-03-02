@@ -150,7 +150,7 @@ export function TaskCard({ task, goalTitle, goals, onEdit, onDelete, onComplete 
 
       {/* Action buttons */}
       {(onEdit || onDelete || onComplete) && confirming === 'none' && (
-        <div className="flex gap-3 mt-4 pt-3 border-t border-gray-800">
+        <div className="flex flex-wrap gap-3 mt-4 pt-3 border-t border-gray-800">
           {onComplete && (
             <button
               onClick={() => setConfirming('complete')}

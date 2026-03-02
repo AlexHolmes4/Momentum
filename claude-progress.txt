@@ -261,3 +261,35 @@ NOTES:
 NEXT:
   Session 12: F046-F049 (Loading states polish, empty states polish, error handling, responsive layout)
 ---
+
+---
+[Session 12 — Polish — 2026-03-02]
+STATUS: Complete
+COMPLETED:
+  - F046: Loading states — already implemented (spinner + text on all 4 pages), marked passing
+  - F047: Empty states — already implemented (friendly messages per section), marked passing
+  - F048: Error handling — already implemented (red inline error bars + form errors), marked passing
+  - F049: Responsive layout — collapsible sidebar with hamburger menu on mobile
+  - src/app/layout.tsx — mobile top bar with hamburger, sidebar overlay with backdrop, close-on-nav
+  - Main content padding: p-4 md:p-8, pt-16 md:pt-8 (accounts for mobile top bar)
+  - src/components/CreateTaskForm.tsx — grid-cols-1 md:grid-cols-2 on form field rows
+  - src/app/dashboard/page.tsx — grid-cols-1 md:grid-cols-2 on quick-add form
+  - src/components/FilterBar.tsx — reduced search min-width from 180px to 140px
+  - src/components/TaskCard.tsx — added flex-wrap to action buttons
+  - src/components/GoalCard.tsx — added flex-wrap to action buttons
+VERIFIED:
+  - npm run build passes (zero errors, all 8 static routes)
+  - npm test passes (16 tests, no regressions)
+  - npx tsc --noEmit clean
+  - Desktop (1280px): sidebar static, visible; mobile top bar hidden
+  - Mobile (375px): sidebar off-screen, hamburger visible, no horizontal scroll
+  - No console errors
+NOTES:
+  - All 49 features now passing — app feature-complete
+  - Sidebar uses translate-x transition for smooth slide-in/out on mobile
+  - Backdrop (bg-black/50) closes sidebar on click-outside
+  - Nav links auto-close sidebar on mobile navigation
+  - F046-F048 were already complete from prior sessions — this session just verified and marked them
+NEXT:
+  Feature-complete. Future work: deploy to Cloudflare Pages, wire email summary route.
+---

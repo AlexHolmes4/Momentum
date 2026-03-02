@@ -70,7 +70,7 @@ export function CreateTaskForm({ createTask, goals, onCreated, onCancel }: Props
         </div>
 
         {/* Priority + Due date row */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
             <label className="block text-xs text-gray-400 mb-1">Priority</label>
             <select
@@ -95,7 +95,7 @@ export function CreateTaskForm({ createTask, goals, onCreated, onCancel }: Props
         </div>
 
         {/* Category + Goal row */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
             <label className="block text-xs text-gray-400 mb-1">Category</label>
             <input
