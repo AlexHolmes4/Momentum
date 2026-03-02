@@ -236,3 +236,28 @@ NOTES:
 NEXT:
   Session 11: F041-F044 (useArchive hook, Archive view, archived tasks list, archived goals list)
 ---
+
+---
+[Session 11 — Archive — 2026-03-01]
+STATUS: Complete
+COMPLETED:
+  - F041: src/hooks/useArchive.ts — lazy-loading hook with fetchArchive(), archivedTasks, archivedGoals, goalMap, loading, error
+  - F042: src/app/archive/page.tsx — full archive view with two sections, loading/error/empty states
+  - F043: Archived tasks list — ArchivedTaskCard with priority badge, completion date, category, linked goal name
+  - F044: Archived goals list — ArchivedGoalCard with status badge (archived=gray, completed=green), description, target date
+VERIFIED:
+  - npm run build passes (zero errors, all static routes including /archive)
+  - npm test passes (16 tests, no regressions)
+  - npx tsc --noEmit clean
+  - Spec compliance review: passed (all 3 features verified line-by-line)
+  - Code quality review: approved (9/10, no blocking issues)
+NOTES:
+  - useArchive is lazy — loading starts false, no useEffect auto-fetch (per CLAUDE.md rule)
+  - Three parallel Supabase queries via Promise.all (archived_tasks, non-active goals, all goals for goalMap)
+  - goalMap built from ALL goals (including active) for name resolution on archived tasks
+  - Added console.warn for allGoalsRes error (reviewer suggestion — graceful degradation)
+  - ArchivedTaskCard and ArchivedGoalCard are page-local components (not in /components — read-only, single-use)
+  - Archive view is fully read-only — no mutation actions
+NEXT:
+  Session 12: F046-F049 (Loading states polish, empty states polish, error handling, responsive layout)
+---
