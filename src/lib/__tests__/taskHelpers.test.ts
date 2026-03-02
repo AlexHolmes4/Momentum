@@ -66,6 +66,46 @@ describe('filterTasks', () => {
   it('returns empty array when no matches', () => {
     expect(filterTasks(tasks, { priority: 'low', category: 'work' })).toEqual([])
   })
+
+  it('filters by dueDateRange=today', () => {
+    const today = '2026-02-20'
+    const result = filterTasks(tasks, { dueDateRange: 'today' }, today)
+    expect(result).toHaveLength(1)
+    expect(result[0].id).toBe('1') // due_date '2026-02-20' === today
+  })
+
+  it('filters by dueDateRange=overdue', () => {
+    const today = '2026-02-22'
+    const result = filterTasks(tasks, { dueDateRange: 'overdue' }, today)
+    expect(result).toHaveLength(1)
+    expect(result[0].id).toBe('1') // due_date '2026-02-20' < '2026-02-22'
+  })
+
+  it('filters by dueDateRange=this_week (Mon-Sun)', () => {
+    // 2026-02-23 is a Monday. End of week = 2026-03-01 (Sunday).
+    const today = '2026-02-23'
+    const weekTasks = [
+      makeTask({ id: '1', due_date: '2026-02-22' }), // before this week
+      makeTask({ id: '2', due_date: '2026-02-23' }), // Monday (today)
+      makeTask({ id: '3', due_date: '2026-02-27' }), // Friday
+      makeTask({ id: '4', due_date: '2026-03-01' }), // Sunday (end of week)
+      makeTask({ id: '5', due_date: '2026-03-02' }), // next Monday (out)
+      makeTask({ id: '6', due_date: null }),           // no date (excluded)
+    ]
+    const result = filterTasks(weekTasks, { dueDateRange: 'this_week' }, today)
+    expect(result.map(t => t.id).sort()).toEqual(['2', '3', '4'])
+  })
+
+  it('dueDateRange filters exclude tasks with null due_date', () => {
+    const today = '2026-02-20'
+    const result = filterTasks(tasks, { dueDateRange: 'today' }, today)
+    expect(result.every(t => t.due_date !== null)).toBe(true)
+  })
+
+  it('existing filters still work without today param', () => {
+    const result = filterTasks(tasks, { priority: 'high' })
+    expect(result).toHaveLength(2)
+  })
 })
 
 describe('sortTasks', () => {

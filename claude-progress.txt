@@ -209,3 +209,55 @@ NOTES:
 NEXT:
   Session 10: F035-F040 (FilterBar, filter by priority/goal/date/category, search)
 ---
+
+---
+[Session 10 — Filter & Search — 2026-03-01]
+STATUS: Complete
+COMPLETED:
+  - F035: src/components/FilterBar.tsx — controlled component with search + 4 dropdown filters + Clear all
+  - F036: Filter by priority — dropdown in FilterBar, wired through filterTasks
+  - F037: Filter by goal — dropdown in FilterBar, populated from useGoals, wired through filterTasks
+  - F038: Filter by due date — dropdown (today/this week/overdue), new dueDateRange field in taskHelpers
+  - F039: Filter by category — dropdown in FilterBar, categories extracted dynamically from tasks
+  - F040: Search — FilterBar search input on Tasks page + standalone search input on Goals page (title+description)
+VERIFIED:
+  - npm run build passes (zero errors, all static routes)
+  - npm test passes (16 tests — 11 existing + 5 new due-date filter tests)
+  - npx tsc --noEmit clean
+  - FilterBar renders on Tasks page with all controls
+  - Goals page search filters goals by title/description
+NOTES:
+  - filterTasks now accepts optional `today` parameter (3rd arg) for pure due-date filtering
+  - UTC-safe date arithmetic (getUTCDay/setUTCDate) avoids timezone bugs
+  - This-week = Monday through Sunday of the current week
+  - Categories extracted dynamically: [...new Set(tasks.map(t => t.category))]
+  - Goals search filters by title AND description (case-insensitive)
+  - "No tasks match your filters" / "No goals match your search" empty states added
+NEXT:
+  Session 11: F041-F044 (useArchive hook, Archive view, archived tasks list, archived goals list)
+---
+
+---
+[Session 11 — Archive — 2026-03-01]
+STATUS: Complete
+COMPLETED:
+  - F041: src/hooks/useArchive.ts — lazy-loading hook with fetchArchive(), archivedTasks, archivedGoals, goalMap, loading, error
+  - F042: src/app/archive/page.tsx — full archive view with two sections, loading/error/empty states
+  - F043: Archived tasks list — ArchivedTaskCard with priority badge, completion date, category, linked goal name
+  - F044: Archived goals list — ArchivedGoalCard with status badge (archived=gray, completed=green), description, target date
+VERIFIED:
+  - npm run build passes (zero errors, all static routes including /archive)
+  - npm test passes (16 tests, no regressions)
+  - npx tsc --noEmit clean
+  - Spec compliance review: passed (all 3 features verified line-by-line)
+  - Code quality review: approved (9/10, no blocking issues)
+NOTES:
+  - useArchive is lazy — loading starts false, no useEffect auto-fetch (per CLAUDE.md rule)
+  - Three parallel Supabase queries via Promise.all (archived_tasks, non-active goals, all goals for goalMap)
+  - goalMap built from ALL goals (including active) for name resolution on archived tasks
+  - Added console.warn for allGoalsRes error (reviewer suggestion — graceful degradation)
+  - ArchivedTaskCard and ArchivedGoalCard are page-local components (not in /components — read-only, single-use)
+  - Archive view is fully read-only — no mutation actions
+NEXT:
+  Session 12: F046-F049 (Loading states polish, empty states polish, error handling, responsive layout)
+---

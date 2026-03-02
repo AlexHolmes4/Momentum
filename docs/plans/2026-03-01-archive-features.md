@@ -1,3 +1,117 @@
+# Archive Features (F041-F044) Implementation Plan
+
+> **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
+
+**Goal:** Build the Archive view so users can see completed tasks and archived/completed goals.
+
+**Architecture:** Single `useArchive` hook fetches archived_tasks + non-active goals + a goalMap for name resolution. Archive page renders two read-only sections. No mutations — archive is read-only.
+
+**Tech Stack:** React 19, Supabase client, TypeScript, Tailwind CSS v4
+
+---
+
+### Task 1: useArchive hook
+
+**Files:**
+- Create: `src/hooks/useArchive.ts`
+
+**Step 1: Create the hook**
+
+```typescript
+'use client'
+import { useState, useCallback } from 'react'
+import { supabase } from '@/lib/supabase'
+import type { Goal } from '@/hooks/useGoals'
+
+export type ArchivedTask = {
+  id: string
+  title: string
+  priority: 'high' | 'medium' | 'low'
+  due_date: string | null
+  category: string | null
+  goal_id: string | null
+  completed_at: string | null
+  original_created_at: string | null
+}
+
+export function useArchive() {
+  const [archivedTasks, setArchivedTasks] = useState<ArchivedTask[]>([])
+  const [archivedGoals, setArchivedGoals] = useState<Goal[]>([])
+  const [goalMap, setGoalMap] = useState<Record<string, string>>({})
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchArchive = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+
+    const [tasksRes, goalsRes, allGoalsRes] = await Promise.all([
+      supabase
+        .from('archived_tasks')
+        .select('*')
+        .order('completed_at', { ascending: false }),
+      supabase
+        .from('goals')
+        .select('*')
+        .in('status', ['archived', 'completed'])
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('goals')
+        .select('id, title'),
+    ])
+
+    if (tasksRes.error) {
+      setError(tasksRes.error.message)
+      setLoading(false)
+      return
+    }
+    if (goalsRes.error) {
+      setError(goalsRes.error.message)
+      setLoading(false)
+      return
+    }
+
+    setArchivedTasks(tasksRes.data ?? [])
+    setArchivedGoals((goalsRes.data ?? []) as Goal[])
+
+    // Build goalMap from all goals for name resolution on archived tasks
+    const map: Record<string, string> = {}
+    for (const g of (allGoalsRes.data ?? [])) {
+      map[g.id] = g.title
+    }
+    setGoalMap(map)
+
+    setLoading(false)
+  }, [])
+
+  return { archivedTasks, archivedGoals, goalMap, loading, error, fetchArchive }
+}
+```
+
+**Step 2: Verify TypeScript compiles**
+
+Run: `npx tsc --noEmit`
+Expected: no errors
+
+**Step 3: Commit**
+
+```bash
+git add src/hooks/useArchive.ts
+git commit -m "feat: add useArchive hook (F041)"
+```
+
+---
+
+### Task 2: Archive page with both sections
+
+**Files:**
+- Modify: `src/app/archive/page.tsx`
+
+**Step 1: Implement the full Archive page**
+
+Replace the stub with a full page that renders archived tasks and archived goals:
+
+```typescript
 'use client'
 import { useEffect } from 'react'
 import { useArchive } from '@/hooks/useArchive'
@@ -171,3 +285,51 @@ export default function ArchivePage() {
     </div>
   )
 }
+```
+
+**Step 2: Verify TypeScript compiles**
+
+Run: `npx tsc --noEmit`
+Expected: no errors
+
+**Step 3: Verify build passes**
+
+Run: `npm run build`
+Expected: all static routes generate including /archive
+
+**Step 4: Verify page renders**
+
+Start dev server, navigate to `/archive`, use `preview_snapshot` to confirm:
+- "Archive" heading
+- "Archived Tasks" section heading
+- "Archived Goals" section heading
+- Empty states or data rendered correctly
+
+**Step 5: Commit**
+
+```bash
+git add src/app/archive/page.tsx
+git commit -m "feat: add Archive view with tasks and goals sections (F042, F043, F044)"
+```
+
+---
+
+### Task 3: Run all tests + update feature tracker
+
+**Step 1: Run existing tests**
+
+Run: `npm test`
+Expected: all 16 tests pass (no regressions)
+
+**Step 2: Update claude-features.json**
+
+Set F041, F042, F043, F044 status to `"passing"`.
+
+**Step 3: Append session summary to claude-progress.txt**
+
+**Step 4: Final commit**
+
+```bash
+git add claude-features.json claude-progress.txt
+git commit -m "feat: mark F041-F044 archive features complete (session 11)"
+```

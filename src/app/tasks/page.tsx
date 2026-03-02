@@ -2,14 +2,16 @@
 import { useState, useMemo } from 'react'
 import { useTasks } from '@/hooks/useTasks'
 import { useGoals } from '@/hooks/useGoals'
-import { sortTasks } from '@/lib/taskHelpers'
+import { filterTasks, sortTasks, type TaskFilters } from '@/lib/taskHelpers'
 import { TaskCard } from '@/components/TaskCard'
 import { CreateTaskForm } from '@/components/CreateTaskForm'
+import { FilterBar } from '@/components/FilterBar'
 
 export default function TasksPage() {
   const { tasks, loading, error, createTask, updateTask, deleteTask, completeTask } = useTasks()
   const { goals } = useGoals()
   const [showForm, setShowForm] = useState(false)
+  const [filters, setFilters] = useState<TaskFilters>({})
 
   // Build goal name lookup: id -> title
   const goalMap = useMemo(
@@ -17,8 +19,20 @@ export default function TasksPage() {
     [goals]
   )
 
-  // Default sort: priority (high -> medium -> low)
-  const sorted = useMemo(() => sortTasks(tasks, 'priority'), [tasks])
+  // Extract unique categories from tasks
+  const categories = useMemo(
+    () => [...new Set(tasks.map(t => t.category).filter((c): c is string => c !== null))].sort(),
+    [tasks]
+  )
+
+  // Today string for due-date filtering
+  const today = useMemo(() => new Date().toISOString().slice(0, 10), [])
+
+  // Filter then sort
+  const filtered = useMemo(() => {
+    const f = filterTasks(tasks, filters, today)
+    return sortTasks(f, 'priority')
+  }, [tasks, filters, today])
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -43,10 +57,18 @@ export default function TasksPage() {
         />
       )}
 
+      {/* Filter bar */}
+      <FilterBar
+        filters={filters}
+        onFiltersChange={setFilters}
+        goals={goals}
+        categories={categories}
+      />
+
       {/* Loading state */}
       {loading && (
         <div className="flex items-center gap-3 text-gray-400">
-          <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
+          <svg className="animate-spin h-5 w-5" aria-hidden="true" viewBox="0 0 24 24" fill="none">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
           </svg>
@@ -69,10 +91,17 @@ export default function TasksPage() {
         </div>
       )}
 
+      {/* No filter results */}
+      {!loading && !error && tasks.length > 0 && filtered.length === 0 && (
+        <div className="text-center py-12 text-gray-500">
+          <p className="text-sm">No tasks match your filters.</p>
+        </div>
+      )}
+
       {/* Task list */}
-      {!loading && !error && sorted.length > 0 && (
+      {!loading && !error && filtered.length > 0 && (
         <ul className="flex flex-col gap-4">
-          {sorted.map(task => (
+          {filtered.map(task => (
             <li key={task.id}>
               <TaskCard
                 task={task}
