@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useAuthContext } from '@/components/AuthProvider'
 
 export type Task = {
   id: string
@@ -34,6 +35,7 @@ export function useTasks() {
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { user } = useAuthContext()
 
   const fetchTasks = useCallback(async () => {
     setLoading(true)
@@ -58,7 +60,7 @@ export function useTasks() {
   const createTask = useCallback(async (input: CreateTaskInput): Promise<Task> => {
     const { data, error: err } = await supabase
       .from('tasks')
-      .insert([{ ...input, status: 'active' }])
+      .insert([{ ...input, status: 'active', user_id: user!.id }])
       .select()
       .single()
     if (err) throw err
@@ -111,6 +113,7 @@ export function useTasks() {
         goal_id: task.goal_id,
         completed_at: new Date().toISOString(),
         original_created_at: task.created_at,
+        user_id: user!.id,
       }])
     if (archiveErr) throw archiveErr
 
