@@ -8,15 +8,17 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
 
+  const isLoginPage = pathname === '/login' || pathname === '/login/'
+
   useEffect(() => {
     if (loading) return
-    if (!user && pathname !== '/login') {
+    if (!user && !isLoginPage) {
       router.replace('/login')
     }
-    if (user && pathname === '/login') {
+    if (user && isLoginPage) {
       router.replace('/dashboard')
     }
-  }, [user, loading, pathname, router])
+  }, [user, loading, isLoginPage, router])
 
   // Loading state — full-page spinner
   if (loading) {
@@ -34,7 +36,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   }
 
   // Not logged in and not on login page — show nothing while redirecting
-  if (!user && pathname !== '/login') {
+  if (!user && !isLoginPage) {
     return null
   }
 

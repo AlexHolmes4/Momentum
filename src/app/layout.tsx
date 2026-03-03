@@ -19,7 +19,8 @@ function AppShell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   // Login page renders without sidebar
-  if (pathname === '/login' || !user) {
+  const isLoginPage = pathname === '/login' || pathname === '/login/'
+  if (isLoginPage || !user) {
     return <>{children}</>
   }
 
