@@ -10,7 +10,16 @@ type AuthContextType = {
   signOut: () => Promise<void>
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
+// Provide a safe default so static-export prerender of /login doesn't throw.
+// The real values are provided by AuthProvider in layout.tsx (Task 5).
+const defaultContext: AuthContextType = {
+  user: null,
+  loading: true,
+  signIn: async () => {},
+  signOut: async () => {},
+}
+
+const AuthContext = createContext<AuthContextType>(defaultContext)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const auth = useAuth()
@@ -18,9 +27,5 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useAuthContext() {
-  const context = useContext(AuthContext)
-  if (context === undefined) {
-    throw new Error('useAuthContext must be used within an AuthProvider')
-  }
-  return context
+  return useContext(AuthContext)
 }
