@@ -52,6 +52,13 @@
     { "id": "F046", "area": "polish", "name": "Loading states", "description": "Skeleton or spinner on Goals and Tasks views while Supabase data fetches (from hook loading state)", "status": "passing" },
     { "id": "F047", "area": "polish", "name": "Empty states", "description": "Friendly message when no goals or tasks exist", "status": "passing" },
     { "id": "F048", "area": "polish", "name": "Error handling", "description": "Supabase errors displayed as inline message or toast (from hook error state)", "status": "passing" },
-    { "id": "F049", "area": "polish", "name": "Responsive layout", "description": "Layout works at min 768px without horizontal scroll", "status": "passing" }
+    { "id": "F049", "area": "polish", "name": "Responsive layout", "description": "Layout works at min 768px without horizontal scroll", "status": "passing" },
+    { "id": "F050", "area": "auth", "name": "Schema migration for user_id + RLS", "description": "user_id column on goals, tasks, archived_tasks. RLS policies on all 4 tables.", "status": "passing" },
+    { "id": "F051", "area": "auth", "name": "useAuth hook", "description": "Exposes user, loading, signIn(email), signOut. Manages session via supabase.auth.", "status": "passing" },
+    { "id": "F052", "area": "auth", "name": "AuthProvider context", "description": "Wraps app in layout.tsx, provides auth state to all children via useAuthContext.", "status": "passing" },
+    { "id": "F053", "area": "auth", "name": "Login page", "description": "/login route with email input, magic link flow, success/error states.", "status": "passing" },
+    { "id": "F054", "area": "auth", "name": "Auth-guarded layout", "description": "Redirect to /login if no session. Loading spinner during session check.", "status": "passing" },
+    { "id": "F055", "area": "auth", "name": "Update hooks with user_id", "description": "createGoal, createTask, completeTask inserts include user_id from auth context.", "status": "passing" },
+    { "id": "F056", "area": "auth", "name": "Sign out", "description": "Logout button in sidebar shows email and calls signOut.", "status": "passing" }
   ]
 }

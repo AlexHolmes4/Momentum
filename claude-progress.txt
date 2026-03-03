@@ -293,3 +293,37 @@ NOTES:
 NEXT:
   Feature-complete. Future work: deploy to Cloudflare Pages, wire email summary route.
 ---
+
+---
+[Session 13 — Auth + RLS — 2026-03-03]
+STATUS: Complete
+BRANCH: feat/session-13-auth
+COMPLETED:
+  - F050: supabase/migration-auth-rls.sql — user_id columns on goals, tasks, archived_tasks + RLS policies on all 4 tables
+  - F051: src/hooks/useAuth.ts — useAuth hook with getSession, onAuthStateChange, signIn(email) via OTP, signOut
+  - F052: src/components/AuthProvider.tsx — React context wrapping app, exposes useAuthContext()
+  - F053: src/app/login/page.tsx — magic link login page with email input, success/error states
+  - F054: Auth-guarded layout — AuthGate redirects to /login if no session, spinner during loading
+  - F055: Updated useGoals + useTasks hooks — createGoal, createTask, completeTask inserts include user_id
+  - F056: Sign out button in sidebar — shows user email, calls signOut
+  - Design doc: docs/plans/2026-03-03-auth-rls-design.md
+  - Implementation plan: docs/plans/2026-03-03-auth-rls-plan.md
+VERIFIED:
+  - npm run build passes (zero errors, 9 static routes including /login)
+  - npm test passes (22 tests — 16 existing + 6 new useAuth tests)
+  - npx tsc --noEmit clean
+  - Spec compliance review passed for auth-guarded layout (14/14 checks)
+NOTES:
+  - Security model: UI is convenience layer, RLS is the security boundary
+  - Auth method: Supabase magic link (passwordless OTP)
+  - Multi-user capable: user_id on all data tables, RLS scopes per user
+  - Invite only: disable signups in Supabase dashboard, add users manually
+  - subtasks table has no user_id — RLS checks via parent task ownership subquery
+  - AuthProvider uses default no-op context for static prerendering compatibility
+  - Vitest updated to jsdom environment for React hook testing
+  - Installed @testing-library/react for renderHook
+  - vi.hoisted() used in tests for Vitest v4 compatibility
+NEXT:
+  Supabase dashboard setup (manual): disable signups, add redirect URLs, invite user, run migration SQL.
+  Future: Cloudflare Worker for email summary, deploy to Cloudflare Pages.
+---
