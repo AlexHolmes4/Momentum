@@ -61,12 +61,9 @@ create table if not exists archived_tasks (
 -- =====================
 -- ROW LEVEL SECURITY
 -- =====================
--- Single-user app — no auth required yet.
--- To add auth later: enable RLS and add per-user policies.
-alter table goals disable row level security;
-alter table tasks disable row level security;
-alter table subtasks disable row level security;
-alter table archived_tasks disable row level security;
+-- RLS is configured in migration-auth-rls.sql.
+-- Run that migration after initial schema setup and user creation.
+-- See docs/plans/2026-03-03-auth-rls-design.md for details.
 
 -- =====================
 -- MCP-FRIENDLY COMMENTS

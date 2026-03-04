@@ -111,7 +111,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Priority + Due date row */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label htmlFor="qa-priority" className="block text-xs text-gray-400 mb-1">Priority</label>
                 <select

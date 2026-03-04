@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useAuthContext } from '@/components/AuthProvider'
 
 export type Goal = {
   id: string
@@ -28,6 +29,7 @@ export function useGoals() {
   const [goals, setGoals] = useState<Goal[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { user } = useAuthContext()
 
   const fetchGoals = useCallback(async () => {
     setLoading(true)
@@ -52,7 +54,7 @@ export function useGoals() {
   const createGoal = useCallback(async (input: CreateGoalInput): Promise<Goal> => {
     const { data, error: err } = await supabase
       .from('goals')
-      .insert([{ ...input, status: 'active' }])
+      .insert([{ ...input, status: 'active', user_id: user!.id }])
       .select()
       .single()
     if (err) throw err

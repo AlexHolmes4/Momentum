@@ -261,3 +261,69 @@ NOTES:
 NEXT:
   Session 12: F046-F049 (Loading states polish, empty states polish, error handling, responsive layout)
 ---
+
+---
+[Session 12 — Polish — 2026-03-02]
+STATUS: Complete
+COMPLETED:
+  - F046: Loading states — already implemented (spinner + text on all 4 pages), marked passing
+  - F047: Empty states — already implemented (friendly messages per section), marked passing
+  - F048: Error handling — already implemented (red inline error bars + form errors), marked passing
+  - F049: Responsive layout — collapsible sidebar with hamburger menu on mobile
+  - src/app/layout.tsx — mobile top bar with hamburger, sidebar overlay with backdrop, close-on-nav
+  - Main content padding: p-4 md:p-8, pt-16 md:pt-8 (accounts for mobile top bar)
+  - src/components/CreateTaskForm.tsx — grid-cols-1 md:grid-cols-2 on form field rows
+  - src/app/dashboard/page.tsx — grid-cols-1 md:grid-cols-2 on quick-add form
+  - src/components/FilterBar.tsx — reduced search min-width from 180px to 140px
+  - src/components/TaskCard.tsx — added flex-wrap to action buttons
+  - src/components/GoalCard.tsx — added flex-wrap to action buttons
+VERIFIED:
+  - npm run build passes (zero errors, all 8 static routes)
+  - npm test passes (16 tests, no regressions)
+  - npx tsc --noEmit clean
+  - Desktop (1280px): sidebar static, visible; mobile top bar hidden
+  - Mobile (375px): sidebar off-screen, hamburger visible, no horizontal scroll
+  - No console errors
+NOTES:
+  - All 49 features now passing — app feature-complete
+  - Sidebar uses translate-x transition for smooth slide-in/out on mobile
+  - Backdrop (bg-black/50) closes sidebar on click-outside
+  - Nav links auto-close sidebar on mobile navigation
+  - F046-F048 were already complete from prior sessions — this session just verified and marked them
+NEXT:
+  Feature-complete. Future work: deploy to Cloudflare Pages, wire email summary route.
+---
+
+---
+[Session 13 — Auth + RLS — 2026-03-03]
+STATUS: Complete
+BRANCH: feat/session-13-auth
+COMPLETED:
+  - F050: supabase/migration-auth-rls.sql — user_id columns on goals, tasks, archived_tasks + RLS policies on all 4 tables
+  - F051: src/hooks/useAuth.ts — useAuth hook with getSession, onAuthStateChange, signIn(email) via OTP, signOut
+  - F052: src/components/AuthProvider.tsx — React context wrapping app, exposes useAuthContext()
+  - F053: src/app/login/page.tsx — magic link login page with email input, success/error states
+  - F054: Auth-guarded layout — AuthGate redirects to /login if no session, spinner during loading
+  - F055: Updated useGoals + useTasks hooks — createGoal, createTask, completeTask inserts include user_id
+  - F056: Sign out button in sidebar — shows user email, calls signOut
+  - Design doc: docs/plans/2026-03-03-auth-rls-design.md
+  - Implementation plan: docs/plans/2026-03-03-auth-rls-plan.md
+VERIFIED:
+  - npm run build passes (zero errors, 9 static routes including /login)
+  - npm test passes (22 tests — 16 existing + 6 new useAuth tests)
+  - npx tsc --noEmit clean
+  - Spec compliance review passed for auth-guarded layout (14/14 checks)
+NOTES:
+  - Security model: UI is convenience layer, RLS is the security boundary
+  - Auth method: Supabase magic link (passwordless OTP)
+  - Multi-user capable: user_id on all data tables, RLS scopes per user
+  - Invite only: disable signups in Supabase dashboard, add users manually
+  - subtasks table has no user_id — RLS checks via parent task ownership subquery
+  - AuthProvider uses default no-op context for static prerendering compatibility
+  - Vitest updated to jsdom environment for React hook testing
+  - Installed @testing-library/react for renderHook
+  - vi.hoisted() used in tests for Vitest v4 compatibility
+NEXT:
+  Supabase dashboard setup (manual): disable signups, add redirect URLs, invite user, run migration SQL.
+  Future: Cloudflare Worker for email summary, deploy to Cloudflare Pages.
+---

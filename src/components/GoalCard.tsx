@@ -132,7 +132,7 @@ export function GoalCard({ goal, progress, linkedTasks, onEdit, onDelete, onArch
 
       {/* Action buttons */}
       {(onEdit || onDelete || onArchive) && !confirmingDelete && (
-        <div className="flex gap-3 mt-4 pt-3 border-t border-gray-800">
+        <div className="flex flex-wrap gap-3 mt-4 pt-3 border-t border-gray-800">
           {onEdit && (
             <button
               onClick={() => setEditing(true)}

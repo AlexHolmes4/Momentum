@@ -29,7 +29,7 @@ export function FilterBar({ filters, onFiltersChange, goals, categories }: Filte
         placeholder="Search tasks..."
         value={filters.search ?? ''}
         onChange={e => update({ search: e.target.value || undefined })}
-        className="bg-gray-800 text-white text-sm rounded-lg px-3 py-1.5 placeholder-gray-500 border border-gray-700 focus:border-indigo-500 focus:outline-none min-w-[180px]"
+        className="bg-gray-800 text-white text-sm rounded-lg px-3 py-1.5 placeholder-gray-500 border border-gray-700 focus:border-indigo-500 focus:outline-none min-w-[140px]"
       />
 
       {/* Priority */}
