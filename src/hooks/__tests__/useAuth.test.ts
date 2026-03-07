@@ -2,12 +2,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // Use vi.hoisted so these refs are available inside the vi.mock factory,
 // which Vitest hoists to the top of the module before any imports run.
-const { mockGetSession, mockOnAuthStateChange, mockSignInWithOtp, mockSignOut } =
+const { mockGetSession, mockOnAuthStateChange, mockSignInWithOtp, mockSignOut, mockVerifyOtp } =
   vi.hoisted(() => ({
     mockGetSession: vi.fn(),
     mockOnAuthStateChange: vi.fn(),
     mockSignInWithOtp: vi.fn(),
     mockSignOut: vi.fn(),
+    mockVerifyOtp: vi.fn(),
   }))
 
 vi.mock('@/lib/supabase', () => ({
@@ -17,6 +18,7 @@ vi.mock('@/lib/supabase', () => ({
       onAuthStateChange: mockOnAuthStateChange,
       signInWithOtp: mockSignInWithOtp,
       signOut: mockSignOut,
+      verifyOtp: mockVerifyOtp,
     },
   },
 }))
@@ -88,5 +90,33 @@ describe('useAuth', () => {
       await result.current.signOut()
     })
     expect(mockSignOut).toHaveBeenCalled()
+  })
+
+  it('verifyOtp calls supabase verifyOtp with email, token, and type email', async () => {
+    mockVerifyOtp.mockResolvedValue({ data: {}, error: null })
+    const { result } = renderHook(() => useAuth())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    await act(async () => {
+      await result.current.verifyOtp('test@example.com', '123456')
+    })
+    expect(mockVerifyOtp).toHaveBeenCalledWith({
+      email: 'test@example.com',
+      token: '123456',
+      type: 'email',
+    })
+  })
+
+  it('verifyOtp throws on error', async () => {
+    mockVerifyOtp.mockResolvedValue({
+      data: null,
+      error: { message: 'Token has expired or is invalid' },
+    })
+    const { result } = renderHook(() => useAuth())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    await expect(
+      act(async () => {
+        await result.current.verifyOtp('test@example.com', '000000')
+      })
+    ).rejects.toThrow('Token has expired or is invalid')
   })
 })
