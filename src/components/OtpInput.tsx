@@ -8,18 +8,18 @@ type Props = {
 
 export default function OtpInput({ onChange, disabled }: Props) {
   const refs = useRef<(HTMLInputElement | null)[]>([])
-  const digits = useRef<string[]>(Array(6).fill(''))
+  const digits = useRef<string[]>(Array(8).fill(''))
 
   function notify() {
     const code = digits.current.join('')
-    if (code.length === 6) onChange(code)
+    if (code.length === 8) onChange(code)
   }
 
   function handleChange(e: ChangeEvent<HTMLInputElement>, index: number) {
     const val = e.target.value.replace(/\D/g, '').slice(-1)
     digits.current[index] = val
     e.target.value = val
-    if (val && index < 5) refs.current[index + 1]?.focus()
+    if (val && index < 7) refs.current[index + 1]?.focus()
     notify()
   }
 
@@ -32,12 +32,12 @@ export default function OtpInput({ onChange, disabled }: Props) {
 
   function handlePaste(e: ClipboardEvent<HTMLInputElement>) {
     e.preventDefault()
-    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6)
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 8)
     pasted.split('').forEach((char, i) => {
       digits.current[i] = char
       if (refs.current[i]) refs.current[i]!.value = char
     })
-    refs.current[Math.min(pasted.length, 5)]?.focus()
+    refs.current[Math.min(pasted.length, 7)]?.focus()
     notify()
   }
 
@@ -47,7 +47,7 @@ export default function OtpInput({ onChange, disabled }: Props) {
 
   return (
     <div className="flex gap-2 justify-center">
-      {Array.from({ length: 6 }, (_, i) => (
+      {Array.from({ length: 8 }, (_, i) => (
         <input
           key={i}
           ref={el => { refs.current[i] = el }}
