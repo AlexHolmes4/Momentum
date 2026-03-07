@@ -38,7 +38,7 @@ src/
   hooks/                    useGoals.ts, useTasks.ts, useArchive.ts
 supabase/
   schema.sql                Run in Supabase SQL Editor before first use
-docs/designs/               Feature design docs (brainstorm output, permanent project knowledge)
+docs/plans/               Feature design docs (brainstorm output, permanent project knowledge)
 .claude/plans/              Agent implementation plans and session working files (ephemeral)
 ```
 
@@ -78,7 +78,7 @@ If no linked tasks: progress = 0%. Logic lives in `src/lib/goalHelpers.ts`.
 
 ## File Conventions
 - **`docs/`** — permanent project documentation, committed and useful to any developer
-  - `docs/designs/*-design.md` — feature design docs produced by brainstorming (what we built and why)
+  - `docs/plans/*-design.md` — feature design docs produced by brainstorming (what we built and why)
 - **`.claude/`** — Claude Code config and working files, not project documentation
   - `.claude/plans/*-plan.md` — agent implementation plans produced by writing-plans skill
   - `.claude/plans/session-*.md` — session execution plans and notes
