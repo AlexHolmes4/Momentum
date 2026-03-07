@@ -2,9 +2,9 @@
   "app": "Momentum",
   "version": "1.0",
   "framework": "Next.js 16 App Router + TypeScript",
-  "instructions": "Work through features in order. Only change 'failing' to 'passing' after verifying in the browser at http://localhost:3000. Never remove entries.",
+  "instructions": "Work through features in order. Only change 'failing' to 'passing' after verifying in the browser at http://localhost:11001. Never remove entries.",
   "features": [
-    { "id": "F001", "area": "infrastructure", "name": "Next.js + TypeScript scaffold", "description": "npm run dev starts at localhost:3000 without errors", "status": "passing" },
+    { "id": "F001", "area": "infrastructure", "name": "Next.js + TypeScript scaffold", "description": "npm run dev starts at localhost:11001 without errors", "status": "passing" },
     { "id": "F002", "area": "infrastructure", "name": "Tailwind dark mode", "description": "bg-gray-950 background renders, dark class on <html>", "status": "passing" },
     { "id": "F003", "area": "infrastructure", "name": "Static export configured", "description": "next.config.js has output: 'export' and trailingSlash: true, npm run build creates out/", "status": "passing" },
     { "id": "F004", "area": "infrastructure", "name": "Supabase client wired", "description": "src/lib/supabase.ts exports client, missing env vars throw clear error", "status": "passing" },
