@@ -9,12 +9,12 @@ Single user, no auth, dark mode only, TypeScript throughout.
 - **Frontend**: Next.js 16 (latest), TypeScript, React 19, Tailwind CSS v4 (class dark mode)
 - **Database**: Supabase (Postgres) — 4 tables: goals, tasks, subtasks, archived_tasks
 - **Supabase client**: `@supabase/ssr` (`createBrowserClient`) + publishable key (`sb_publishable_...`)
-- **Hosting**: Cloudflare Pages — static export (`output: 'export'` in next.config.js)
+- **Hosting**: Cloudflare Workers (static assets) — static export (`output: 'export'` in next.config.js), `wrangler.toml` points at `out/` — https://momentum.alexgholmes.workers.dev
 - **MCP**: Supabase MCP connector lets Claude query/mutate the DB directly from claude.ai chat
 
 ## Important: Static Export
 The app uses `output: 'export'` in next.config.js. This means:
-- `npm run build` generates `out/` — Cloudflare Pages serves these static files
+- `npm run build` generates `out/` — Cloudflare Workers serves these static files
 - No SSR — all Supabase queries are client-side
 - All interactive components MUST have `'use client'` at the top
 - The root layout.tsx is already `'use client'` for the sidebar

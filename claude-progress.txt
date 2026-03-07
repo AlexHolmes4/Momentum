@@ -23,7 +23,7 @@ NOTES:
   - .env.local needs real NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
   - All interactive components need 'use client' directive (static export requirement)
   - API route stub at /api/send-summary requires server runtime — does not work in static export
-  - Dev server runs at http://localhost:3000
+  - Dev server runs at http://localhost:11001
 NEXT:
   Session 2: implement F006 (useGoals hook) + F007 (goalHelpers) + F008 (Goals list view)
 ---
@@ -35,10 +35,10 @@ COMPLETED:
   - F006: src/hooks/useGoals.ts — useGoals hook with goals, loading, error, createGoal, updateGoal, deleteGoal, archiveGoal, refetch
   - F007: src/lib/goalHelpers.ts — calculateProgress(tasks: Task[]): number pure function (0-100, returns 0 for no tasks)
   - F008: src/app/goals/page.tsx — Goals list view using useGoals, with loading/error/empty states and goal cards
-  - Added .claude/launch.json for preview_start dev server (cmd /c npm run dev, port 3000)
+  - Added .claude/launch.json for preview_start dev server (cmd /c npm run dev, port 11001)
 VERIFIED:
   - npm run build passes cleanly (zero TypeScript errors, /goals generates as static page)
-  - Goals page renders at localhost:3000/goals — dark mode, sidebar, empty state confirmed in browser
+  - Goals page renders at localhost:11001/goals — dark mode, sidebar, empty state confirmed in browser
   - useGoals connects to Supabase and correctly returns empty list for fresh DB
 NOTES:
   - .claude/launch.json uses cmd /c npm run dev (Windows requires this vs plain npm)
@@ -58,7 +58,7 @@ COMPLETED:
 VERIFIED:
   - npm run build passes cleanly (all static routes including /goals)
   - Goals page structural check via preview_snapshot: heading, Add Goal button, empty state all confirmed
-  - User confirmed app visible at localhost:3000 via Preview button
+  - User confirmed app visible at localhost:11001 via Preview button
 NOTES:
   - GoalCard progress prop hardcoded to 0 — will receive calculated value once useTasks is built (F016+)
   - CreateGoalForm receives createGoal as prop from page to avoid double-invoking useGoals
@@ -119,7 +119,7 @@ COMPLETED:
 VERIFIED:
   - npm run build passes cleanly
   - npm test passes (11 taskHelpers tests, no regressions)
-  - Tasks page renders at localhost:3000/tasks with correct structure
+  - Tasks page renders at localhost:11001/tasks with correct structure
   - Priority badges show correct color coding per CLAUDE.md conventions
 NOTES:
   - TaskCard is read-only — action buttons (complete/edit/delete) come in F021-F024
@@ -170,7 +170,7 @@ VERIFIED:
   - npm run build passes cleanly (8/8 routes, zero errors)
   - npm test passes (11 taskHelpers tests, no regressions)
   - npx tsc --noEmit clean at every step
-  - Tasks page renders at localhost:3000/tasks without console errors
+  - Tasks page renders at localhost:11001/tasks without console errors
   - Code reviewed: spec compliance + code quality for Tasks 2, 3, 5
 NOTES:
   - Architecture: Approach B — separate useSubtasks hook + dumb SubtaskList + SubtaskListContainer
@@ -194,7 +194,7 @@ VERIFIED:
   - npm run build passes (zero errors, 8/8 static routes)
   - npm test passes (11 taskHelpers tests, no regressions)
   - npx tsc --noEmit clean
-  - Dashboard renders all 3 sections at localhost:3000/dashboard
+  - Dashboard renders all 3 sections at localhost:11001/dashboard
   - Quick-add form renders with Title, Priority, Due date fields
   - TaskCards fully actionable (complete/edit/delete) from Dashboard
   - Code reviewed: spec compliance (passed) + code quality (approved with notes)
@@ -326,4 +326,25 @@ NOTES:
 NEXT:
   Supabase dashboard setup (manual): disable signups, add redirect URLs, invite user, run migration SQL.
   Future: Cloudflare Worker for email summary, deploy to Cloudflare Pages.
+---
+
+---
+[Session 14 — Cloudflare Workers Deployment — 2026-03-07]
+STATUS: Complete
+COMPLETED:
+  - wrangler.toml — static assets config pointing at out/ with force-trailing-slash + 404-page handling
+  - .github/workflows/deploy.yml — GitHub Actions workflow using cloudflare/wrangler-action@v3
+  - Deploys automatically on every push to main
+  - 4 GitHub secrets configured: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+  - Switched from Cloudflare Pages to Cloudflare Workers (static assets) — Workers is Cloudflare's future-focused platform
+  - Live URL: https://momentum.alexgholmes.workers.dev
+NOTES:
+  - wrangler-action@v3 with wranglerVersion: '4' pinned to avoid deprecation warnings
+  - Next.js build cache added to workflow (actions/cache@v4) for faster future builds
+  - html_handling = "force-trailing-slash" matches next.config.js trailingSlash: true
+  - not_found_handling = "404-page" serves out/404.html for unmatched routes
+  - Auto-detection (wrangler deploy without config) only works for OpenNext/SSR — static export requires explicit wrangler.toml
+  - GITHUB_TOKEN is auto-injected by GitHub Actions — no manual secret needed
+NEXT:
+  App is live. Future: wire email summary route via Cloudflare Worker + Resend/SendGrid.
 ---
