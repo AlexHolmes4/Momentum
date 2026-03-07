@@ -28,6 +28,7 @@ export default function LoginPage() {
   }
 
   async function handleCodeComplete(code: string) {
+    if (loading) return
     setLoading(true)
     setError(null)
     try {
@@ -35,6 +36,7 @@ export default function LoginPage() {
       // AuthGate redirects to /dashboard on auth state change
     } catch {
       setError('Invalid or expired code. Please try again.')
+    } finally {
       setLoading(false)
     }
   }
