@@ -195,7 +195,7 @@ Expected: Zero TypeScript errors, `/tasks` route generated as static page.
 
 **Step 3: Verify page structure with preview_snapshot**
 
-Navigate to `http://localhost:3000/tasks` and run `preview_snapshot`.
+Navigate to `http://localhost:11001/tasks` and run `preview_snapshot`.
 Expected: Page heading "Tasks" visible. If DB has tasks, TaskCard elements render with titles and priority badges. If DB is empty, "No active tasks yet" empty state renders.
 
 **Step 4: Run existing tests to confirm no regressions**
@@ -237,7 +237,7 @@ COMPLETED:
 VERIFIED:
   - npm run build passes cleanly
   - npm test passes (11 taskHelpers tests, no regressions)
-  - Tasks page renders at localhost:3000/tasks with correct structure
+  - Tasks page renders at localhost:11001/tasks with correct structure
   - Priority badges show correct color coding per CLAUDE.md conventions
 NOTES:
   - TaskCard is read-only — action buttons (complete/edit/delete) come in F021-F024

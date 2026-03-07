@@ -310,7 +310,7 @@ const [expanded, setExpanded] = useState(false)
 
 **Step 3: Add subtasks toggle button**
 
-Insert after the metadata row (the `{(task.due_date || task.category || goalTitle) && (` block) and before the complete confirmation bar. This toggle is always visible:
+Insert after the localhost:11001 row (the `{(task.due_date || task.category || goalTitle) && (` block) and before the complete confirmation bar. This toggle is always visible:
 
 ```tsx
 {/* Subtasks toggle */}
@@ -363,8 +363,8 @@ Expected: all 11 taskHelpers tests pass, no regressions
 
 **Step 3: Verify in browser**
 
-Start dev server, navigate to http://localhost:3000/tasks. Verify via `preview_snapshot`:
-- TaskCard shows "▶ Subtasks" toggle below metadata
+Start dev server, navigate to http://localhost:11001/tasks. Verify via `preview_snapshot`:
+- TaskCard shows "▶ Subtasks" toggle below localhost:11001
 - Clicking toggle expands subtask area with "No subtasks yet." message and add input
 - Adding a subtask shows it with checkbox
 - Checking all subtasks triggers green "Mark task complete?" confirmation bar

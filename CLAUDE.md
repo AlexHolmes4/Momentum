@@ -38,7 +38,8 @@ src/
   hooks/                    useGoals.ts, useTasks.ts, useArchive.ts
 supabase/
   schema.sql                Run in Supabase SQL Editor before first use
-docs/plans/                 Session implementation plans
+docs/designs/               Feature design docs (brainstorm output, permanent project knowledge)
+.claude/plans/              Agent implementation plans and session working files (ephemeral)
 ```
 
 ## Agent Startup Sequence (EVERY session)
@@ -46,7 +47,7 @@ docs/plans/                 Session implementation plans
 2. Read `claude-progress.txt` — understand what's done
 3. Read `claude-features.json` — find first `"status": "failing"` entry
 4. Implement that feature (one per session)
-5. Test at http://localhost:3000 (run: npm run dev)
+5. Test at http://localhost:11001 (run: npm run dev)
 6. Update `claude-features.json`: set feature status to `"passing"`
 7. Append session summary to `claude-progress.txt`
 8. Commit
@@ -74,6 +75,14 @@ docs/plans/                 Session implementation plans
 progress% = (count of linked tasks where status='completed' / count of all linked tasks) * 100
 ```
 If no linked tasks: progress = 0%. Logic lives in `src/lib/goalHelpers.ts`.
+
+## File Conventions
+- **`docs/`** — permanent project documentation, committed and useful to any developer
+  - `docs/designs/*-design.md` — feature design docs produced by brainstorming (what we built and why)
+- **`.claude/`** — Claude Code config and working files, not project documentation
+  - `.claude/plans/*-plan.md` — agent implementation plans produced by writing-plans skill
+  - `.claude/plans/session-*.md` — session execution plans and notes
+  - `.claude/launch.json` — dev server config
 
 ## Key Business Rules
 - Completing ALL subtasks does NOT auto-complete parent task — show a prompt, user confirms

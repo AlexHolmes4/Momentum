@@ -852,7 +852,7 @@ After all tasks, verify end-to-end:
 ### Supabase Dashboard Setup (manual, not in code)
 
 1. Authentication → Settings → disable "Allow new users to sign up"
-2. Authentication → URL Configuration → add redirect URLs (localhost:3000, production URL)
+2. Authentication → URL Configuration → add redirect URLs (localhost:11001, production URL)
 3. Authentication → Users → "Invite user" to add your email
 4. SQL Editor → run `supabase/migration-auth-rls.sql`
 5. After first login, backfill existing data with your user_id (uncomment lines in migration)

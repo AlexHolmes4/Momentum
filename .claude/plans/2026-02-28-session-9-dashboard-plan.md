@@ -357,7 +357,7 @@ Expected: all 11 taskHelpers tests pass, no regressions
 
 **Step 3: Verify in browser**
 
-Start dev server, navigate to http://localhost:3000/dashboard. Verify via `preview_snapshot`:
+Start dev server, navigate to http://localhost:11001/dashboard. Verify via `preview_snapshot`:
 - "Dashboard" heading visible with "+ Quick Add" button
 - "Overdue" section heading visible (with or without tasks)
 - "Today" section heading visible (with or without tasks)
@@ -395,7 +395,7 @@ VERIFIED:
   - npm run build passes (zero errors, all static routes)
   - npm test passes (11 taskHelpers tests, no regressions)
   - npx tsc --noEmit clean
-  - Dashboard renders all 3 sections at localhost:3000/dashboard
+  - Dashboard renders all 3 sections at localhost:11001/dashboard
   - Quick-add creates tasks that appear in correct section immediately
   - TaskCards fully actionable (complete/edit/delete) from Dashboard
 NOTES:

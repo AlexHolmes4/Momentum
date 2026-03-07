@@ -400,7 +400,7 @@ Expected: All 16 tests PASS
 
 **Step 4: Start dev server and verify**
 
-Run dev server, then verify at localhost:3000/tasks:
+Run dev server, then verify at localhost:11001/tasks:
 - FilterBar renders with search input + 4 dropdowns
 - Selecting a priority filter reduces the visible task list
 - "Clear all" link appears when a filter is active and resets everything
@@ -478,7 +478,7 @@ Expected: All 16 tests PASS
 
 **Step 4: Start dev server and verify**
 
-At localhost:3000/goals:
+At localhost:11001/goals:
 - Search input renders below the header
 - Typing filters goals by title/description
 - Clearing search shows all goals again

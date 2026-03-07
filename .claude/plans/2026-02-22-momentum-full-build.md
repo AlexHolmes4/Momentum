@@ -462,7 +462,7 @@ export async function GET() {
 ```bash
 npm run dev
 ```
-Open http://localhost:3000 — should auto-redirect to http://localhost:3000/dashboard.
+Open http://localhost:11001 — should auto-redirect to http://localhost:11001/dashboard.
 Verify: dark sidebar, Momentum title, 4 nav links, active link is indigo, no console errors.
 
 **Step 7: Commit**
@@ -533,7 +533,7 @@ docs/plans/                 Session implementation plans
 2. Read `claude-progress.txt` — understand what's done
 3. Read `claude-features.json` — find first `"status": "failing"` entry
 4. Implement that feature (one per session)
-5. Test at http://localhost:3000 (run: npm run dev)
+5. Test at http://localhost:11001 (run: npm run dev)
 6. Update `claude-features.json`: set feature status to `"passing"`
 7. Append session summary to `claude-progress.txt`
 8. Commit
@@ -612,7 +612,7 @@ echo ""
 echo "=== Agent Instructions ==="
 echo "1. Find first 'failing' feature in claude-features.json"
 echo "2. Implement it — one feature per session"
-echo "3. Test at http://localhost:3000 (npm run dev)"
+echo "3. Test at http://localhost:11001 (npm run dev)"
 echo "4. Update claude-features.json status to 'passing'"
 echo "5. Append summary to claude-progress.txt"
 echo "6. Commit"
@@ -646,7 +646,7 @@ NOTES:
   - .env.local needs real NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
   - All interactive components need 'use client' directive (static export requirement)
   - API route stub at /api/send-summary requires server runtime — does not work in static export
-  - Dev server runs at http://localhost:3000
+  - Dev server runs at http://localhost:11001
 NEXT:
   Session 2: implement F006 (useGoals hook) + F007 (goalHelpers) + F008 (Goals list view)
 ---
@@ -658,9 +658,9 @@ NEXT:
   "app": "Momentum",
   "version": "1.0",
   "framework": "Next.js 14 App Router + TypeScript",
-  "instructions": "Work through features in order. Only change 'failing' to 'passing' after verifying in the browser at http://localhost:3000. Never remove entries.",
+  "instructions": "Work through features in order. Only change 'failing' to 'passing' after verifying in the browser at http://localhost:11001. Never remove entries.",
   "features": [
-    { "id": "F001", "area": "infrastructure", "name": "Next.js + TypeScript scaffold", "description": "npm run dev starts at localhost:3000 without errors", "status": "passing" },
+    { "id": "F001", "area": "infrastructure", "name": "Next.js + TypeScript scaffold", "description": "npm run dev starts at localhost:11001 without errors", "status": "passing" },
     { "id": "F002", "area": "infrastructure", "name": "Tailwind dark mode", "description": "bg-gray-950 background renders, dark class on <html>", "status": "passing" },
     { "id": "F003", "area": "infrastructure", "name": "Static export configured", "description": "next.config.js has output: 'export' and trailingSlash: true, npm run build creates out/", "status": "passing" },
     { "id": "F004", "area": "infrastructure", "name": "Supabase client wired", "description": "src/lib/supabase.ts exports client, missing env vars throw clear error", "status": "passing" },
@@ -766,8 +766,8 @@ git commit -m "docs: save Initializer Session implementation plan"
 ```bash
 npm run dev
 ```
-Open http://localhost:3000. Verify:
-- [ ] Redirects to http://localhost:3000/dashboard
+Open http://localhost:11001. Verify:
+- [ ] Redirects to http://localhost:11001/dashboard
 - [ ] Dark bg-gray-950 background
 - [ ] Sidebar with Momentum + 4 nav links
 - [ ] Active link highlights indigo
