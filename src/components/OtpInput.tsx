@@ -44,11 +44,11 @@ export default function OtpInput({ onChange, disabled }: Props) {
   }
 
   const boxClass =
-    'w-8 h-12 text-center text-lg font-bold text-white bg-gray-800 border border-gray-700 rounded-lg ' +
+    'w-0 min-w-0 flex-1 h-12 text-center text-lg font-bold text-white bg-gray-800 border border-gray-700 rounded-lg ' +
     'focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:opacity-50'
 
   return (
-    <div className="flex gap-1.5 justify-center">
+    <div className="flex gap-1.5">
       {Array.from({ length: 8 }, (_, i) => (
         <input
           key={i}
