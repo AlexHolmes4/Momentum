@@ -48,7 +48,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 w-full max-w-sm">
+      <div className="bg-gray-900 border border-gray-800 rounded-xl px-4 py-8 sm:px-8 w-full max-w-sm">
         <h1 className="text-2xl font-bold text-white mb-2">Momentum</h1>
 
         {step === 'email' ? (
@@ -86,7 +86,7 @@ export default function LoginPage() {
           </>
         ) : (
           <>
-            <p className="text-sm text-gray-400 mb-1">Enter the 6-digit code sent to</p>
+            <p className="text-sm text-gray-400 mb-1">Enter the 8-digit code sent to</p>
             <p className="text-sm text-white font-medium mb-6">{email}</p>
 
             {error && (
