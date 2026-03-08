@@ -26,7 +26,9 @@ export default function OtpInput({ onChange, disabled }: Props) {
   function handleKeyDown(e: KeyboardEvent<HTMLInputElement>, index: number) {
     if (e.key === 'Backspace' && !e.currentTarget.value && index > 0) {
       digits.current[index - 1] = ''
-      refs.current[index - 1]?.focus()
+      const prev = refs.current[index - 1]
+      if (prev) prev.value = ''
+      prev?.focus()
     }
   }
 
