@@ -360,13 +360,7 @@ The implementation spans multiple sessions:
 
 ---
 
-## 11. Documentation References
-
-See **[docs/ai-assistant-references.md](../ai-assistant-references.md)** — standalone file with all verified tech stack links, updated across sessions.
-
----
-
-## 12. Open Questions
+## 11. Open Questions
 
 - **Auth**: The .NET API needs to verify the caller is a valid Momentum user. Options: pass Supabase JWT in `Authorization` header and verify server-side, or use a simple API key for now.
 - **Session state**: In-memory conversation history works for a single replica. If we ever scale, need Redis or Supabase for persistence.
