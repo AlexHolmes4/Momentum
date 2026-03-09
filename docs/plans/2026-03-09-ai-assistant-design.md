@@ -309,9 +309,11 @@ For a personal productivity app with a single user, this is effectively free. Wi
 2. GitHub Actions builds and pushes to Azure Container Registry (100GB free)
 3. Azure Container Apps pulls and deploys
 
+**Avoid Azure Functions for this feature** — the consumption plan has execution time limits and SSE streaming responses are not cleanly supported. Container Apps is the right Azure choice.
+
 **Alternatives if Azure isn't preferred:**
-- **Railway.app** — simple Docker deployment, generous free tier, no cold starts
-- **fly.io** — free tier with 3 shared VMs, global edge deployment
+- **fly.io** — container-native, scale-to-zero, global edge (~$10.70/mo for 1 vCPU / 2GB RAM; best non-Azure option)
+- **Railway.app** — trial credit only ($5), not perpetual free; good for prototyping
 
 ---
 
@@ -362,16 +364,34 @@ The implementation spans multiple sessions:
 
 This section captures verified documentation links for all technologies used in this feature. These were web-searched on 2026-03-09 to ensure they reflect the current state of each technology.
 
+### .NET AI Stack Overview (2026)
+
+Three complementary layers exist — they are not competing:
+
+| Layer | Package | Role |
+|-------|---------|------|
+| `Microsoft.Extensions.AI` | `Microsoft.Extensions.AI` | Lowest-level: `IChatClient`, `IEmbeddingGenerator` — provider-agnostic primitives (GA) |
+| Semantic Kernel | `Microsoft.SemanticKernel` | Orchestration: plugins, function calling, memory, multi-agent, MCP (recommended for this feature) |
+| Microsoft Agent Framework | `Microsoft.AI.Agents` | Top-level: graph workflows, A2A, checkpointing, human-in-the-loop (still maturing) |
+
+For this feature, use **Semantic Kernel** for orchestration, built on **Microsoft.Extensions.AI** for provider abstraction.
+
 ### Microsoft Agent Framework & Semantic Kernel
 
 | Topic | URL |
 |-------|-----|
 | Semantic Kernel Docs (Microsoft Learn) | https://learn.microsoft.com/en-us/semantic-kernel/ |
 | Semantic Kernel Agent Framework | https://learn.microsoft.com/en-us/semantic-kernel/frameworks/agent/ |
+| Microsoft.Extensions.AI | https://learn.microsoft.com/en-us/dotnet/ai/microsoft-extensions-ai |
+| .NET + AI Ecosystem overview | https://learn.microsoft.com/en-us/dotnet/ai/dotnet-ai-ecosystem |
 | Microsoft Agent Framework announcement | https://devblogs.microsoft.com/semantic-kernel/semantic-kernel-and-microsoft-agent-framework/ |
+| Microsoft Agent Framework GitHub | https://github.com/microsoft/agent-framework |
+| Microsoft Agent Framework — First Agent Quickstart | https://learn.microsoft.com/en-us/agent-framework/get-started/your-first-agent |
 | SK + Microsoft Agent Framework (Visual Studio Magazine, Oct 2025) | https://visualstudiomagazine.com/articles/2025/10/01/semantic-kernel-autogen--open-source-microsoft-agent-framework.aspx |
 | Semantic Kernel GitHub | https://github.com/microsoft/semantic-kernel |
-| SK Quick Start Guide | https://github.com/MicrosoftDocs/semantic-kernel-docs/blob/main/semantic-kernel/get-started/quick-start-guide.md |
+| SK streaming API: GetStreamingChatMessageContentsAsync | https://learn.microsoft.com/en-us/dotnet/api/microsoft.semantickernel.chatcompletion.ichatcompletionservice.getstreamingchatmessagecontentsasync?view=semantic-kernel-dotnet |
+| SK ChatCompletionAgent | https://learn.microsoft.com/en-us/semantic-kernel/frameworks/agent/agent-types/chat-completion-agent |
+| SK OpenAI Streaming Sample | https://github.com/microsoft/semantic-kernel/blob/main/dotnet/samples/Concepts/ChatCompletion/OpenAI_ChatCompletionStreaming.cs |
 
 **Key note (2026):** Microsoft recommends Semantic Kernel v1.x for existing/near-term projects. For new projects, **Microsoft Agent Framework** (SK + AutoGen unified) is the future direction. For this feature, Semantic Kernel is appropriate and will migrate cleanly.
 
@@ -404,8 +424,9 @@ This section captures verified documentation links for all technologies used in 
 | SSE in ASP.NET Core (antondevtips) | https://antondevtips.com/blog/real-time-server-sent-events-in-asp-net-core |
 | Pragmatic SSE Guide (Roxeem) | https://roxeem.com/2025/10/24/a-pragmatic-guide-to-server-sent-events-sse-in-asp-net-core/ |
 | SSE MCP Server in .NET (Medium) | https://medium.com/@hany.habib1988/building-a-server-sent-event-sse-mcp-server-with-net-core-c-48ac55000336 |
+| Real-Time AI Streaming with Azure OpenAI (Microsoft Community Hub) | https://techcommunity.microsoft.com/blog/azuredevcommunityblog/real%E2%80%91time-ai-streaming-with-azure-openai-and-signalr/4468833 |
 
-**Key note:** .NET 10 adds native `TypedResults.ServerSentEvents` / `Results.ServerSentEvents` with `IAsyncEnumerable<T>`. For earlier .NET versions, set `Content-Type: text/event-stream` and write `data: ...\n\n` manually.
+**Key note:** .NET 10 adds native `TypedResults.ServerSentEvents` / `Results.ServerSentEvents` with `IAsyncEnumerable<T>`. For earlier .NET versions, set `Content-Type: text/event-stream` and write `data: ...\n\n` manually. The SK streaming primitive is `IChatCompletionService.GetStreamingChatMessageContentsAsync()` returning `IAsyncEnumerable<StreamingChatMessageContent>`.
 
 ### LLM Evaluation
 
@@ -425,6 +446,9 @@ This section captures verified documentation links for all technologies used in 
 | Azure Container Apps | https://azure.microsoft.com/en-us/products/container-apps |
 | Azure Container Apps Pricing | https://azure.microsoft.com/en-us/pricing/details/container-apps/ |
 | Azure Container Apps Billing (free tier details) | https://learn.microsoft.com/en-us/azure/container-apps/billing |
+| Azure Container Apps Plan Types | https://learn.microsoft.com/en-us/azure/container-apps/plans |
+| Azure Functions Pricing (for reference — not recommended for SSE) | https://azure.microsoft.com/en-us/pricing/details/functions/ |
+| fly.io vs Railway comparison (2026) | https://thesoftwarescout.com/fly-io-vs-railway-2026-which-developer-platform-should-you-deploy-on/ |
 
 ---
 
