@@ -410,10 +410,29 @@ For this feature, use **Semantic Kernel** for orchestration, built on **Microsof
 | Give SK agents access to MCP servers | https://learn.microsoft.com/en-us/semantic-kernel/concepts/plugins/adding-mcp-plugins |
 | Building an MCP server with SK | https://devblogs.microsoft.com/semantic-kernel/building-a-model-context-protocol-server-with-semantic-kernel/ |
 
+**MCP Server Primitives:**
+| Primitive | Controlled by | Purpose |
+|-----------|---------------|---------|
+| Tools | Model | Actions the LLM can invoke (our main use case) |
+| Resources | Application | Read-only data via URIs (e.g. expose goal list as resource) |
+| Prompts | User | Reusable message templates |
+| Elicitation | Server | Server requests additional info from user mid-interaction (new, 2025-06) |
+
+**MCP Transport (2025-11-25 spec):** Use **Streamable HTTP** for remote servers (replaces legacy SSE transport). stdio for local/embedded servers.
+
 **NuGet packages:**
 - `ModelContextProtocol` — core + DI
-- `ModelContextProtocol.AspNetCore` — HTTP/SSE server
+- `ModelContextProtocol.AspNetCore` — HTTP server transport
 - `ModelContextProtocol.Core` — low-level only
+
+**Additional MCP SDK references:**
+| Topic | URL |
+|-------|-----|
+| MCP TypeScript SDK | https://github.com/modelcontextprotocol/typescript-sdk |
+| MCP Python build guide | https://modelcontextprotocol.io/docs/develop/build-server |
+| MCP SDK overview | https://modelcontextprotocol.io/docs/sdk |
+| MCP features guide (Tools/Resources/Prompts) | https://workos.com/blog/mcp-features-guide |
+| Build MCP server in TypeScript (FreeCodeCamp) | https://www.freecodecamp.org/news/how-to-build-a-custom-mcp-server-with-typescript-a-handbook-for-developers/ |
 
 ### SSE Streaming in ASP.NET Core
 
@@ -433,11 +452,32 @@ For this feature, use **Semantic Kernel** for orchestration, built on **Microsof
 | Topic | URL |
 |-------|-----|
 | promptfoo GitHub (open source) | https://github.com/promptfoo/promptfoo |
+| promptfoo docs | https://www.promptfoo.dev/docs/intro/ |
+| promptfoo assertions / expected outputs | https://www.promptfoo.dev/docs/configuration/expected-outputs/ |
+| promptfoo cross-model output consistency | https://www.danielcorin.com/posts/2023/promptfoo-and-output-structure/ |
 | Braintrust eval platform | https://www.braintrust.dev |
 | Best prompt eval tools 2025 (Braintrust) | https://www.braintrust.dev/articles/best-prompt-evaluation-tools-2025 |
-| LLM eval metrics guide | https://www.braintrust.dev/articles/llm-evaluation-metrics-guide |
+| LLM eval platforms comparison (Arize) | https://arize.com/llm-evaluation-platforms-top-frameworks/ |
 
-**Recommendation:** Use **promptfoo** for this project — open source, CLI-first, YAML config, works in GitHub Actions, compares multiple models side by side.
+**Recommendation:** Use **promptfoo** for this project — open source, CLI-first, YAML config, works in GitHub Actions, compares multiple models side by side. Use `is-json` + JSON schema assertion for schema validation, `llm-rubric` for quality scoring.
+
+### Structured Output (critical for `propose_goals`)
+
+Both providers now have native structured output — schema is compiled to a grammar and token generation is constrained at inference time. This is how we guarantee the `propose_goals` call always returns valid Goal/Task JSON.
+
+| Topic | URL |
+|-------|-----|
+| Anthropic structured outputs (public beta, Nov 2025) | https://platform.claude.com/docs/en/build-with-claude/structured-outputs |
+| Anthropic Agent SDK structured outputs | https://platform.claude.com/docs/en/agent-sdk/structured-outputs |
+| Anthropic cookbook — extracting structured JSON | https://github.com/anthropics/anthropic-cookbook/blob/main/tool_use/extracting_structured_json.ipynb |
+| OpenAI structured outputs | https://platform.openai.com/docs/guides/structured-outputs |
+| LiteLLM unified JSON mode (cross-provider) | https://docs.litellm.ai/docs/completion/json_mode |
+| Structured output provider comparison | https://medium.com/@rosgluk/structured-output-comparison-across-popular-llm-providers-openai-gemini-anthropic-mistral-and-1a5d42fa612a |
+
+**Key notes:**
+- Anthropic native structured outputs require beta header: `anthropic-beta: structured-outputs-2025-11-13` (Claude Sonnet 4.5+, Opus 4.1+)
+- Format guarantees schema compliance, not semantic correctness — numerical ranges and business logic still need post-response validation
+- For cross-provider consistency with SK, use `RetainArgumentTypes = true` in execution settings
 
 ### Hosting
 
