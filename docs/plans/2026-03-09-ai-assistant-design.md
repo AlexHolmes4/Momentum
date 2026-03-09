@@ -360,15 +360,68 @@ The implementation spans multiple sessions:
 
 ---
 
-## 11. Documentation References
+## 11. API Cross-Cutting Concerns
+
+### 11.1 Authentication: Supabase JWT Forwarding
+
+The frontend sends the user's Supabase access token in the `Authorization: Bearer <token>` header. The API verifies the JWT signature using Supabase's JWT secret (from env var).
+
+- ASP.NET middleware extracts and validates the JWT on every request (except `/health`)
+- The `sub` claim gives us the user ID — available to all endpoints via `HttpContext.User`
+- No separate user table in the API — Supabase is the identity provider
+
+### 11.2 Logging: Structured JSON to Stdout
+
+- Configure .NET's built-in `ILogger` with JSON console formatter
+- Log request/response metadata (method, path, status, duration) via middleware
+- Log AI model calls (model, token count, latency) in the assistant service
+- Azure Container Apps captures stdout into Log Analytics (5 GB/month free tier)
+- No extra logging packages — `Microsoft.Extensions.Logging` is sufficient
+
+### 11.3 Error Handling: Global Middleware + SSE Error Events
+
+- **REST endpoints**: Global exception handler returns RFC 7807 Problem Details JSON (`application/problem+json`). Logs the full exception server-side, returns sanitized message to client.
+- **SSE streaming**: Wrap the streaming loop in try/catch. On error, emit `event: error` with `{ message: "Something went wrong" }` before closing the stream. Frontend can display an error state instead of hanging.
+
+### 11.4 Rate Limiting: Per-User via Built-in Middleware
+
+- Use ASP.NET's `Microsoft.AspNetCore.RateLimiting` (built-in, no extra package)
+- Fixed window: **10 requests/minute per user** (keyed on JWT `sub` claim)
+- Returns `429 Too Many Requests` with `Retry-After` header
+- `/health` endpoint is excluded from rate limiting
+- Easy to adjust thresholds via `appsettings.json`
+
+### 11.5 Request Validation: FluentValidation
+
+- Add `FluentValidation.AspNetCore` NuGet package
+- Validators for request DTOs (e.g., `ChatRequest` must have non-empty messages, sessionId within length limits)
+- Validation runs before the endpoint handler — invalid requests get a `400 Bad Request` with structured errors
+- Keeps validation logic out of business code
+
+### 11.6 Configuration: appsettings.json + Environment Variables
+
+```
+appsettings.json (committed):
+  - AllowedOrigins: ["https://momentum.alexgholmes.workers.dev", ...]
+  - RateLimit: { PermitLimit: 10, WindowSeconds: 60 }
+  - Logging: { LogLevel: { Default: "Information" } }
+
+Environment variables (secrets, not committed):
+  - ANTHROPIC_API_KEY
+  - SUPABASE_JWT_SECRET
+  - SUPABASE_URL (for MCP tools in Session 6)
+  - SUPABASE_SERVICE_ROLE_KEY (for MCP tools in Session 6)
+```
+
+---
+
+## 12. Documentation References
 
 See **[docs/ai-assistant-references.md](../ai-assistant-references.md)** — standalone file with all verified tech stack links, updated across sessions.
 
 ---
 
-## 12. Open Questions
+## 13. Open Questions
 
-- **Auth**: The .NET API needs to verify the caller is a valid Momentum user. Options: pass Supabase JWT in `Authorization` header and verify server-side, or use a simple API key for now.
 - **Session state**: In-memory conversation history works for a single replica. If we ever scale, need Redis or Supabase for persistence.
 - **Model choice**: Claude Sonnet is ideal for quality but Haiku is much cheaper. Evals will determine the right default.
-- **Rate limiting**: For a personal app, probably not needed, but consider if the API is exposed via MCP to multiple clients.
