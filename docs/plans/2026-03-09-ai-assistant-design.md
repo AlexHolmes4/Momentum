@@ -421,7 +421,19 @@ See **[docs/ai-assistant-references.md](../ai-assistant-references.md)** — sta
 
 ---
 
-## 13. Open Questions
+## 13. Future: AI Usage Metering
+
+Postman-style monthly token quota per user with progressive warnings. Requires its own design session.
+
+- Track cumulative AI token consumption per user per billing period (Supabase table)
+- Progressive warnings surfaced in chat UI: 50% → 70% → 80% → 90% → 100%
+- At 100%: block AI requests, show upgrade CTA
+- Configurable monthly limits per tier (free vs paid)
+- Separate from infrastructure rate limiting (req/min) — this is a business feature
+
+---
+
+## 14. Open Questions
 
 - **Session state**: In-memory conversation history works for a single replica. If we ever scale, need Redis or Supabase for persistence.
 - **Model choice**: Claude Sonnet is ideal for quality but Haiku is much cheaper. Evals will determine the right default.
