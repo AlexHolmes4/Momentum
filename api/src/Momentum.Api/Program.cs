@@ -17,8 +17,14 @@ builder.Services.AddCors(options =>
     });
 });
 
+// RFC 7807 Problem Details for error responses
+builder.Services.AddProblemDetails();
+
 var app = builder.Build();
 
+// Middleware order matters!
+app.UseExceptionHandler();
+app.UseStatusCodePages();
 app.UseCors();
 
 app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
