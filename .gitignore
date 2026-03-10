@@ -37,3 +37,10 @@ next-env.d.ts
 
 # claude plans & local settings
 .claude/settings.local.json
+
+# .NET
+api/**/bin/
+api/**/obj/
+*.user
+*.suo
+.vs/
