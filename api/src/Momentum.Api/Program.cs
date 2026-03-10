@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Text;
+using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
@@ -52,6 +53,23 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
+// Per-user rate limiting — thresholds from appsettings.json
+var rateLimitPermit = builder.Configuration.GetValue("RateLimit:PermitLimit", 10);
+var rateLimitWindow = builder.Configuration.GetValue("RateLimit:WindowSeconds", 60);
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("per-user", context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: context.User.FindFirst("sub")?.Value ?? "anonymous",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = rateLimitPermit,
+                Window = TimeSpan.FromSeconds(rateLimitWindow)
+            }));
+});
+
 var app = builder.Build();
 
 // Middleware order matters!
@@ -60,13 +78,14 @@ app.UseStatusCodePages();
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 
 app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
 
 app.MapGet("/api/me", (ClaimsPrincipal user) => Results.Ok(new
 {
     userId = user.FindFirst("sub")?.Value
-})).RequireAuthorization();
+})).RequireAuthorization().RequireRateLimiting("per-user");
 
 app.Run();
 
