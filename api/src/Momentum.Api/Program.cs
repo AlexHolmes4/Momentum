@@ -122,7 +122,10 @@ app.MapPost("/api/assistant/chat", async (
     {
         await foreach (var chunk in assistant.StreamAsync(req, ct))
         {
-            yield return new SseItem<object>(new { type = "token", content = chunk });
+            if (chunk.IsProposal)
+                yield return new SseItem<object>(chunk.Proposal!, "proposal");
+            else
+                yield return new SseItem<object>(new { type = "token", content = chunk.Token });
         }
         yield return new SseItem<object>(new { }, "done");
     }

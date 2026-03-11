@@ -76,8 +76,8 @@
     { "id": "A009", "area": "api-chat", "name": "System prompt", "description": "Goal-setting assistant prompt: reflect, ask ≤3 clarifying questions one at a time, call propose_goals.", "status": "passing" },
     { "id": "A010", "area": "api-chat", "name": "FluentValidation", "description": "ChatRequest validator: non-empty messages, sessionId within length limits. 400 on invalid input.", "status": "passing" },
 
-    { "id": "A011", "area": "api-decomposition", "name": "propose_goals kernel function", "description": "Semantic Kernel function with typed ProposedGoal/ProposedTask parameters. Forces structured JSON output.", "status": "failing" },
-    { "id": "A012", "area": "api-decomposition", "name": "Proposal SSE event", "description": "event: proposal with { goals: Goal[], tasks: Task[] } JSON payload when model calls propose_goals.", "status": "failing" },
+    { "id": "A011", "area": "api-decomposition", "name": "propose_goals kernel function", "description": "Semantic Kernel function with typed ProposedGoal/ProposedTask parameters. Forces structured JSON output.", "status": "passing" },
+    { "id": "A012", "area": "api-decomposition", "name": "Proposal SSE event", "description": "event: proposal with { goals: Goal[], tasks: Task[] } JSON payload when model calls propose_goals.", "status": "passing" },
 
     { "id": "A013", "area": "assistant-frontend", "name": "Assistant page", "description": "src/app/assistant/page.tsx — 'use client' chat interface with brain dump prompt.", "status": "failing" },
     { "id": "A014", "area": "assistant-frontend", "name": "useAssistant hook", "description": "src/hooks/useAssistant.ts — manages SSE connection, message state, proposal state, sendMessage().", "status": "failing" },

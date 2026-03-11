@@ -1,7 +1,9 @@
 using System.Runtime.CompilerServices;
 using System.Text;
+using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Momentum.Api.Models;
+using Momentum.Api.Plugins;
 
 namespace Momentum.Api.Services;
 
@@ -16,7 +18,7 @@ public class AssistantService
         _sessionStore = sessionStore;
     }
 
-    public async IAsyncEnumerable<string> StreamAsync(
+    public async IAsyncEnumerable<StreamChunk> StreamAsync(
         ChatRequest request,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
@@ -27,26 +29,41 @@ public class AssistantService
             var history = _sessionStore.GetOrCreate(request.SessionId);
 
             // Only the last message is appended — server-side history is the source of truth.
-            // Earlier messages in the request are ignored (client sends full history for context,
-            // but the server already has it via SessionStore).
             var lastMessage = request.Messages[^1];
             history.AddUserMessage(lastMessage.Content);
+
+            // Build kernel with proposal plugin for function calling
+            var plugin = new GoalProposalPlugin();
+            var kernelBuilder = Kernel.CreateBuilder();
+            kernelBuilder.Services.AddSingleton(_chatService);
+            var kernel = kernelBuilder.Build();
+            kernel.Plugins.AddFromObject(plugin);
+
+            var settings = new PromptExecutionSettings
+            {
+                FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
+            };
 
             // Stream the AI response
             var fullResponse = new StringBuilder();
             await foreach (var chunk in _chatService.GetStreamingChatMessageContentsAsync(
-                history, cancellationToken: cancellationToken))
+                history, settings, kernel, cancellationToken))
             {
                 var content = chunk.Content ?? string.Empty;
                 if (content.Length > 0)
                 {
                     fullResponse.Append(content);
-                    yield return content;
+                    yield return StreamChunk.TextToken(content);
                 }
             }
 
             // Append full assistant response to history
-            history.AddAssistantMessage(fullResponse.ToString());
+            if (fullResponse.Length > 0)
+                history.AddAssistantMessage(fullResponse.ToString());
+
+            // If the AI called propose_goals, yield the proposal
+            if (plugin.CapturedProposal != null)
+                yield return StreamChunk.GoalProposal(plugin.CapturedProposal);
         }
         finally
         {

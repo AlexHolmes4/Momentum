@@ -17,13 +17,14 @@ public class AssistantServiceTests
             [new ChatMessage("user", "I want to get fit")],
             "test-session");
 
-        var chunks = new List<string>();
+        var tokens = new List<string>();
         await foreach (var chunk in service.StreamAsync(request, CancellationToken.None))
         {
-            chunks.Add(chunk);
+            if (!chunk.IsProposal)
+                tokens.Add(chunk.Token!);
         }
 
-        Assert.Equal(["Hello", " world", "!"], chunks);
+        Assert.Equal(["Hello", " world", "!"], tokens);
     }
 
     [Fact]
@@ -85,5 +86,48 @@ public class AssistantServiceTests
         var history = sessionStore.GetOrCreate("test-session");
         // system + user1 + assistant1 + user2 + assistant2
         Assert.Equal(5, history.Count);
+    }
+
+    [Fact]
+    public async Task StreamAsync_WhenAICallsProposeGoals_YieldsProposal()
+    {
+        var chatService = new FakeProposalChatService();
+        var sessionStore = new SessionStore();
+        var service = new AssistantService(chatService, sessionStore);
+        var request = new ChatRequest(
+            [new ChatMessage("user", "I want to get fit")],
+            "test-proposal");
+
+        StreamChunk? proposalChunk = null;
+        await foreach (var chunk in service.StreamAsync(request, CancellationToken.None))
+        {
+            if (chunk.IsProposal)
+                proposalChunk = chunk;
+        }
+
+        Assert.NotNull(proposalChunk);
+        Assert.NotNull(proposalChunk!.Proposal);
+        Assert.Single(proposalChunk.Proposal!.Goals);
+        Assert.Equal("Get fit", proposalChunk.Proposal.Goals[0].Title);
+    }
+
+    [Fact]
+    public async Task StreamAsync_WhenNoFunctionCall_YieldsNoProposal()
+    {
+        var chatService = new FakeChatCompletionService("Just text");
+        var sessionStore = new SessionStore();
+        var service = new AssistantService(chatService, sessionStore);
+        var request = new ChatRequest(
+            [new ChatMessage("user", "hello")],
+            "test-no-proposal");
+
+        var hasProposal = false;
+        await foreach (var chunk in service.StreamAsync(request, CancellationToken.None))
+        {
+            if (chunk.IsProposal)
+                hasProposal = true;
+        }
+
+        Assert.False(hasProposal);
     }
 }
