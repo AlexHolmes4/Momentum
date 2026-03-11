@@ -5,6 +5,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Momentum.Api.Models;
+using Momentum.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,6 +58,9 @@ builder.Services.AddAuthorization();
 
 // FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
+// Session store — in-memory conversation history
+builder.Services.AddSingleton<SessionStore>();
 
 // Per-user rate limiting — thresholds from appsettings.json
 var rateLimitPermit = builder.Configuration.GetValue("RateLimit:PermitLimit", 10);
