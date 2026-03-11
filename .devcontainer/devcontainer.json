@@ -1,0 +1,62 @@
+{
+  "name": "Momentum Dev",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "args": {
+      "TZ": "${localEnv:TZ:Europe/London}",
+      "CLAUDE_CODE_VERSION": "latest",
+      "NODE_VERSION": "20"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "anthropic.claude-code",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "eamodio.gitlens",
+        "bradlc.vscode-tailwindcss"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit"
+        },
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "terminal.integrated.profiles.linux": {
+          "bash": { "path": "bash", "icon": "terminal-bash" },
+          "zsh": { "path": "zsh" }
+        },
+        "claude-code.dangerouslySkipPermissions": true
+      }
+    }
+  },
+  "remoteUser": "node",
+  "mounts": [
+    "source=momentum-bashhistory-${devcontainerId},target=/commandhistory,type=volume",
+    "source=momentum-claude-config-${devcontainerId},target=/home/node/.claude,type=volume",
+    "source=${localEnv:USERPROFILE}/.claude/.credentials.json,target=/home/node/.claude/.credentials.json,type=bind,readonly",
+    "source=${localEnv:USERPROFILE}/.claude/settings.json,target=/home/node/.claude/settings.json,type=bind,readonly",
+    "source=${localEnv:USERPROFILE}/.claude/plugins,target=/home/node/.claude/plugins,type=bind,readonly",
+    "source=${localEnv:USERPROFILE}/.claude/skills,target=/home/node/.claude/skills,type=bind,readonly",
+    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+  ],
+  "containerEnv": {
+    "NODE_OPTIONS": "--max-old-space-size=4096",
+    "CLAUDE_CONFIG_DIR": "/home/node/.claude"
+  },
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",
+  "workspaceFolder": "/workspace",
+  "runArgs": [
+    "--cap-add=NET_ADMIN",
+    "--cap-add=NET_RAW"
+  ],
+  "forwardPorts": [11001, 3000],
+  "postCreateCommand": "npm install",
+  "postStartCommand": "sudo /usr/local/bin/init-firewall.sh",
+  "waitFor": "postStartCommand",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+  }
+}
