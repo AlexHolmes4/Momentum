@@ -1,8 +1,10 @@
 using System.Security.Claims;
 using System.Text;
 using System.Threading.RateLimiting;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Momentum.Api.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,6 +55,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
+// FluentValidation
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
 // Per-user rate limiting — thresholds from appsettings.json
 var rateLimitPermit = builder.Configuration.GetValue("RateLimit:PermitLimit", 10);
 var rateLimitWindow = builder.Configuration.GetValue("RateLimit:WindowSeconds", 60);
@@ -86,6 +91,20 @@ app.MapGet("/api/me", (ClaimsPrincipal user) => Results.Ok(new
 {
     userId = user.FindFirst("sub")?.Value
 })).RequireAuthorization().RequireRateLimiting("per-user");
+
+app.MapPost("/api/assistant/chat", async (
+    ChatRequest req,
+    IValidator<ChatRequest> validator,
+    ClaimsPrincipal user,
+    HttpContext ctx) =>
+{
+    var validationResult = await validator.ValidateAsync(req);
+    if (!validationResult.IsValid)
+        return Results.ValidationProblem(validationResult.ToDictionary());
+
+    // Stub — streaming implementation comes in Task 4
+    return Results.Ok(new { status = "not_implemented" });
+}).RequireAuthorization().RequireRateLimiting("per-user");
 
 app.Run();
 
