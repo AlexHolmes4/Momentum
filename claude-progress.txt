@@ -379,3 +379,30 @@ NOTES:
 NEXT:
   API Session 3: A011 (propose_goals kernel function), A012 (proposal SSE event)
 ---
+
+---
+[API Session 3 — propose_goals + Proposal SSE — 2026-03-11]
+STATUS: Complete
+BRANCH: feat/session-api-3-proposals
+COMPLETED:
+  - A011: GoalProposalPlugin with [KernelFunction] ProposeGoals, typed DTOs (ProposedGoal, ProposedTask, GoalProposal)
+  - A012: StreamChunk discriminated type, event: proposal SSE events from chat endpoint
+  - AssistantService refactored to yield StreamChunk (token or proposal)
+  - Kernel built per-request with GoalProposalPlugin + FunctionChoiceBehavior.Auto()
+  - FakeProposalChatService test helper simulates AI calling propose_goals
+  - ProposalApiFactory for integration tests with proposal flow
+VERIFIED:
+  - dotnet test passes (34 tests — 26 existing + 8 new)
+  - Plugin captures proposals correctly (3 unit tests)
+  - AssistantService yields proposals when function is called (2 unit tests)
+  - Endpoint emits event: proposal with goal/task JSON (3 integration tests)
+  - Existing token streaming tests unaffected
+NOTES:
+  - FunctionChoiceBehavior.Auto() registered but only activates with real AI provider
+  - FakeProposalChatService invokes kernel function directly to simulate AI function calling
+  - StreamChunk uses factory methods: StreamChunk.TextToken() and StreamChunk.GoalProposal()
+  - Plugin is instantiated per-request inside AssistantService — no shared state between requests
+  - Kernel builder registers IChatCompletionService for SK auto-invoke loop support
+NEXT:
+  API Session 4 or Frontend Session: A013-A016 (Assistant page, useAssistant hook, AssistantChat, ProposalReview)
+---
