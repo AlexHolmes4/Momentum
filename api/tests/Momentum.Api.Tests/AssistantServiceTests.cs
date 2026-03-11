@@ -17,13 +17,14 @@ public class AssistantServiceTests
             [new ChatMessage("user", "I want to get fit")],
             "test-session");
 
-        var chunks = new List<string>();
+        var tokens = new List<string>();
         await foreach (var chunk in service.StreamAsync(request, CancellationToken.None))
         {
-            chunks.Add(chunk);
+            if (!chunk.IsProposal)
+                tokens.Add(chunk.Token!);
         }
 
-        Assert.Equal(["Hello", " world", "!"], chunks);
+        Assert.Equal(["Hello", " world", "!"], tokens);
     }
 
     [Fact]
