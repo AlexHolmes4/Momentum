@@ -7,6 +7,7 @@ Single user, no auth, dark mode only, TypeScript throughout.
 
 ## Tech Stack
 - **Frontend**: Next.js 16 (latest), TypeScript, React 19, Tailwind CSS v4 (class dark mode)
+- **Backend API**: .NET 10 ASP.NET Core Minimal APIs, Semantic Kernel, C# 14
 - **Database**: Supabase (Postgres) — 4 tables: goals, tasks, subtasks, archived_tasks
 - **Supabase client**: `@supabase/ssr` (`createBrowserClient`) + publishable key (`sb_publishable_...`)
 - **Hosting**: Cloudflare Workers (static assets) — static export (`output: 'export'` in next.config.js), `wrangler.toml` points at `out/` — https://momentum.alexgholmes.workers.dev
