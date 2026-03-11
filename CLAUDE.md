@@ -51,11 +51,14 @@ docs/
 ## Agent Startup Sequence (EVERY session)
 1. `bash init.sh` — verifies env, shows git log, progress, and next failing features
 2. Read `claude-features.json` — find first `"status": "failing"` entry (F### = frontend, A### = API)
-3. Implement that feature or batch
-4. Verify: frontend at http://localhost:11001 | API via `dotnet test` in `api/`
-5. Update `claude-features.json`: set feature status to `"passing"`
-6. Append session summary to `claude-progress.txt`
-7. Commit
+3. Check for an implementation plan in `.claude/plans/` covering those features
+   - **No plan exists** → run `writing-plans` to create one first
+   - **Plan exists** → proceed to step 4
+4. Implement that feature or batch (follow the plan)
+5. Verify: frontend at http://localhost:11001 | API via `dotnet test` in `api/`
+6. Update `claude-features.json`: set feature status to `"passing"`
+7. Append session summary to `claude-progress.txt`
+8. Commit
 
 ## Coding Conventions
 - `'use client'` is required at the top of any component using hooks or browser APIs
