@@ -348,3 +348,34 @@ NOTES:
 NEXT:
   App is live. Future: wire email summary route via Cloudflare Worker + Resend/SendGrid.
 ---
+
+---
+[API Session 2 — Chat Endpoint — 2026-03-11]
+STATUS: Complete
+BRANCH: feat/session-api-2-chat
+COMPLETED:
+  - A007: POST /api/assistant/chat with SSE streaming via .NET 10 TypedResults.ServerSentEvents
+  - A008: SessionStore — ConcurrentDictionary<string, ChatHistory> in-memory conversation history
+  - A009: System prompt — goal-setting assistant with reflect/clarify/propose_goals rules
+  - A010: FluentValidation — ChatRequestValidator + ChatMessageValidator for request validation
+  - AssistantService — streams AI responses via IChatCompletionService, maintains history
+  - FakeChatCompletionService test helper for integration testing
+  - ChatApiFactory — WebApplicationFactory with fake AI service for SSE tests
+  - Per-session SemaphoreSlim locking to prevent concurrent ChatHistory corruption
+  - Explicit "done" SSE event emitted after token stream completes
+VERIFIED:
+  - dotnet test passes (26 tests — 10 existing + 16 new)
+  - Validation: empty messages, empty sessionId, long sessionId, empty content, invalid role → 400
+  - SSE: valid request returns text/event-stream with data events
+  - Auth: request without token → 401
+  - History: messages persist across calls within same sessionId
+  - Code review: approved with fixes applied (locking, done event, comment clarity)
+NOTES:
+  - IChatCompletionService registered as placeholder (throws) — real Anthropic connector in Session 3
+  - SseItem<T> lives in System.Net.ServerSentEvents namespace (not Microsoft.AspNetCore.Http)
+  - FluentValidation.AspNetCore is deprecated — using core FluentValidation + manual validation
+  - SessionStore is singleton (in-memory) — Redis if multi-replica needed (per design doc)
+  - propose_goals function calling deferred to Session 3 (A011-A012)
+NEXT:
+  API Session 3: A011 (propose_goals kernel function), A012 (proposal SSE event)
+---

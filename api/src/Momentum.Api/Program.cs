@@ -1,8 +1,14 @@
+using System.Net.ServerSentEvents;
+using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.RateLimiting;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.SemanticKernel.ChatCompletion;
+using Momentum.Api.Models;
+using Momentum.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,6 +59,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
+// FluentValidation
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
+// Session store — in-memory conversation history
+builder.Services.AddSingleton<SessionStore>();
+
+// Assistant service — orchestrates AI streaming
+builder.Services.AddScoped<AssistantService>();
+
+// Placeholder AI service — replaced by real connector when ANTHROPIC_API_KEY is configured
+builder.Services.AddSingleton<IChatCompletionService>(sp =>
+    throw new InvalidOperationException(
+        "No AI model configured. Set ANTHROPIC_API_KEY environment variable."));
+
 // Per-user rate limiting — thresholds from appsettings.json
 var rateLimitPermit = builder.Configuration.GetValue("RateLimit:PermitLimit", 10);
 var rateLimitWindow = builder.Configuration.GetValue("RateLimit:WindowSeconds", 60);
@@ -86,6 +106,29 @@ app.MapGet("/api/me", (ClaimsPrincipal user) => Results.Ok(new
 {
     userId = user.FindFirst("sub")?.Value
 })).RequireAuthorization().RequireRateLimiting("per-user");
+
+app.MapPost("/api/assistant/chat", async (
+    ChatRequest req,
+    IValidator<ChatRequest> validator,
+    AssistantService assistant,
+    HttpContext ctx) =>
+{
+    var validationResult = await validator.ValidateAsync(req);
+    if (!validationResult.IsValid)
+        return Results.ValidationProblem(validationResult.ToDictionary());
+
+    async IAsyncEnumerable<SseItem<object>> StreamEvents(
+        [EnumeratorCancellation] CancellationToken ct)
+    {
+        await foreach (var chunk in assistant.StreamAsync(req, ct))
+        {
+            yield return new SseItem<object>(new { type = "token", content = chunk });
+        }
+        yield return new SseItem<object>(new { }, "done");
+    }
+
+    return (IResult)TypedResults.ServerSentEvents(StreamEvents(ctx.RequestAborted));
+}).RequireAuthorization().RequireRateLimiting("per-user");
 
 app.Run();
 
