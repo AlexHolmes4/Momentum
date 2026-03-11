@@ -6,6 +6,7 @@ namespace Momentum.Api.Services;
 public class SessionStore
 {
     private readonly ConcurrentDictionary<string, ChatHistory> _sessions = new();
+    private readonly ConcurrentDictionary<string, SemaphoreSlim> _locks = new();
 
     private const string SystemPrompt = """
         You are a goal-setting assistant for Momentum, a personal productivity app.
@@ -29,5 +30,10 @@ public class SessionStore
             history.AddSystemMessage(SystemPrompt);
             return history;
         });
+    }
+
+    public SemaphoreSlim GetLock(string sessionId)
+    {
+        return _locks.GetOrAdd(sessionId, _ => new SemaphoreSlim(1, 1));
     }
 }

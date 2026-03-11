@@ -124,6 +124,7 @@ app.MapPost("/api/assistant/chat", async (
         {
             yield return new SseItem<object>(new { type = "token", content = chunk });
         }
+        yield return new SseItem<object>(new { }, "done");
     }
 
     return (IResult)TypedResults.ServerSentEvents(StreamEvents(ctx.RequestAborted));
