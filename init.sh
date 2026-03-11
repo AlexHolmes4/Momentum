@@ -32,6 +32,12 @@ if [ -d "api" ]; then
   echo "=== API Project ==="
   if dotnet --version &>/dev/null; then
     echo "✅ .NET SDK available"
+    if [ ! -d "api/src/Momentum.Api/bin" ] || [ ! -d "api/src/Momentum.Api/obj" ]; then
+      echo "⚠️  API not restored — running dotnet restore..."
+      dotnet restore api/src/Momentum.Api
+    else
+      echo "✅ API packages restored"
+    fi
   else
     echo "⚠️  .NET SDK not found — API features require .NET 10"
   fi
@@ -47,11 +53,14 @@ git status --short
 
 echo ""
 echo "=== Progress Log ==="
-cat claude-progress.txt
+cat claude-progress.txt 2>/dev/null || echo "(no progress log yet)"
 
 echo ""
 echo "=== Next Features ==="
 # Show first few failing features to indicate what's next
+if [ ! -f "claude-features.json" ]; then
+  echo "(claude-features.json not found — run /project-harness to create it)"
+else
 node -e "
 const f = require('./claude-features.json');
 const failing = f.features.filter(x => x.status === 'failing').slice(0, 5);
@@ -65,6 +74,7 @@ if (failing.length === 0) {
   console.log('  ... (' + passing + '/' + total + ' passing)');
 }
 "
+fi
 
 echo ""
 echo "=== Agent Instructions ==="
