@@ -5,9 +5,13 @@
 Items discovered during implementation that were deferred. Grouped by the feature/session that surfaced them.
 
 ### API Session 1 — Scaffold
-- [ ] FluentValidation — deferred to Session 2 (no DTOs yet)
+- [x] FluentValidation — done in Session 2 (ChatRequestValidator)
 - [ ] Open question: Redis vs in-memory for conversation session state (single replica works for now)
 - [ ] Open question: Model choice — Claude Sonnet vs Haiku, evals will determine (Session 7)
+
+### API Session 3 — propose_goals + Proposal SSE
+- [ ] Priority validation on ProposedTask — `string` accepts any value, not constrained to high/medium/low (validate before Supabase write)
+- [ ] Real AI provider needed — `FunctionChoiceBehavior.Auto()` only activates with a real IChatCompletionService (Anthropic connector in future session)
 
 ### Frontend Session 8 — Subtasks
 - [ ] UUID ordering for subtasks is stable but not strictly chronological (schema improvement)

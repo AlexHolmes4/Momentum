@@ -350,9 +350,9 @@ The implementation spans multiple sessions:
 | Session | Work | Status |
 |---------|------|--------|
 | 1 | Scaffold .NET 10 API, cross-cutting concerns (CORS, error handling, JWT auth, rate limiting, logging) | ✅ Done |
-| 2 | Chat endpoint with SSE streaming, conversation history, basic system prompt, FluentValidation | **Next** |
-| 3 | `propose_goals` kernel function, structured output, `event: proposal` SSE event | |
-| 4 | Frontend: `/assistant` page, `useAssistant` hook, `AssistantChat` component | |
+| 2 | Chat endpoint with SSE streaming, conversation history, basic system prompt, FluentValidation | ✅ Done |
+| 3 | `propose_goals` kernel function, structured output, `event: proposal` SSE event | ✅ Done |
+| 4 | Frontend: `/assistant` page, `useAssistant` hook, `AssistantChat` component | **Next** |
 | 5 | Frontend: `ProposalReview` component, inline editing, Supabase write on confirm | |
 | 6 | MCP server setup: `ModelContextProtocol.AspNetCore`, Momentum tools | |
 | 7 | Eval framework: promptfoo config, test cases, CI integration | |
