@@ -38,19 +38,23 @@ src/
   hooks/                    useGoals.ts, useTasks.ts, useArchive.ts
 supabase/
   schema.sql                Run in Supabase SQL Editor before first use
-docs/plans/               Feature design docs (brainstorm output, permanent project knowledge)
+api/
+  src/Momentum.Api/         .NET 10 ASP.NET Core Minimal API (AI assistant backend)
+  tests/Momentum.Api.Tests/ Integration tests (WebApplicationFactory + xUnit)
+docs/
+  plans/                    Feature design docs (brainstorm output, permanent project knowledge)
+  future-enhancements.md    Deferred items and future feature ideas
 .claude/plans/              Agent implementation plans and session working files (ephemeral)
 ```
 
 ## Agent Startup Sequence (EVERY session)
-1. `bash init.sh` — verifies env, shows git log and current progress
-2. Read `claude-progress.txt` — understand what's done
-3. Read `claude-features.json` — find first `"status": "failing"` entry
-4. Implement that feature (one per session)
-5. Test at http://localhost:11001 (run: npm run dev)
-6. Update `claude-features.json`: set feature status to `"passing"`
-7. Append session summary to `claude-progress.txt`
-8. Commit
+1. `bash init.sh` — verifies env, shows git log, progress, and next failing features
+2. Read `claude-features.json` — find first `"status": "failing"` entry (F### = frontend, A### = API)
+3. Implement that feature or batch
+4. Verify: frontend at http://localhost:11001 | API via `dotnet test` in `api/`
+5. Update `claude-features.json`: set feature status to `"passing"`
+6. Append session summary to `claude-progress.txt`
+7. Commit
 
 ## Coding Conventions
 - `'use client'` is required at the top of any component using hooks or browser APIs

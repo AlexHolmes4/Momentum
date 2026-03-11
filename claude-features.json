@@ -1,8 +1,11 @@
 {
   "app": "Momentum",
   "version": "1.0",
-  "framework": "Next.js 16 App Router + TypeScript",
-  "instructions": "Work through features in order. Only change 'failing' to 'passing' after verifying in the browser at http://localhost:11001. Never remove entries.",
+  "stacks": {
+    "frontend": "Next.js 16 App Router + TypeScript (http://localhost:11001)",
+    "api": ".NET 10 ASP.NET Core Minimal APIs (api/)"
+  },
+  "instructions": "Work through features in order. Only change 'failing' to 'passing' after verifying (browser for frontend, tests for API via 'dotnet test' in api/). Never remove entries.",
   "features": [
     { "id": "F001", "area": "infrastructure", "name": "Next.js + TypeScript scaffold", "description": "npm run dev starts at localhost:11001 without errors", "status": "passing" },
     { "id": "F002", "area": "infrastructure", "name": "Tailwind dark mode", "description": "bg-gray-950 background renders, dark class on <html>", "status": "passing" },
@@ -59,6 +62,37 @@
     { "id": "F053", "area": "auth", "name": "Login page", "description": "/login route with email input, magic link flow, success/error states.", "status": "passing" },
     { "id": "F054", "area": "auth", "name": "Auth-guarded layout", "description": "Redirect to /login if no session. Loading spinner during session check.", "status": "passing" },
     { "id": "F055", "area": "auth", "name": "Update hooks with user_id", "description": "createGoal, createTask, completeTask inserts include user_id from auth context.", "status": "passing" },
-    { "id": "F056", "area": "auth", "name": "Sign out", "description": "Logout button in sidebar shows email and calls signOut.", "status": "passing" }
+    { "id": "F056", "area": "auth", "name": "Sign out", "description": "Logout button in sidebar shows email and calls signOut.", "status": "passing" },
+
+    { "id": "A001", "area": "api-scaffold", "name": "Health endpoint", "description": "GET /health returns 200 OK with { status: 'healthy' }. Integration test.", "status": "passing" },
+    { "id": "A002", "area": "api-scaffold", "name": "CORS configuration", "description": "AllowedOrigins from appsettings.json. Allows production + localhost. Rejects unknown origins. 3 tests.", "status": "passing" },
+    { "id": "A003", "area": "api-scaffold", "name": "Global error handling", "description": "RFC 7807 Problem Details JSON for all errors. UseExceptionHandler + UseStatusCodePages. 1 test.", "status": "passing" },
+    { "id": "A004", "area": "api-scaffold", "name": "JWT authentication", "description": "Supabase JWT verification via Bearer token. MapInboundClaims=false. GET /api/me returns userId. 3 tests.", "status": "passing" },
+    { "id": "A005", "area": "api-scaffold", "name": "Per-user rate limiting", "description": "Fixed window 10 req/min per JWT sub claim. Configurable via appsettings. Health excluded. 2 tests.", "status": "passing" },
+    { "id": "A006", "area": "api-scaffold", "name": "Structured JSON logging", "description": "AddJsonConsole() to stdout. Azure Log Analytics captures via Container Apps.", "status": "passing" },
+
+    { "id": "A007", "area": "api-chat", "name": "Chat endpoint SSE streaming", "description": "POST /api/assistant/chat accepts messages + sessionId, returns text/event-stream with token events.", "status": "failing" },
+    { "id": "A008", "area": "api-chat", "name": "Conversation history", "description": "In-memory session store keyed by sessionId. Maintains message history across requests.", "status": "failing" },
+    { "id": "A009", "area": "api-chat", "name": "System prompt", "description": "Goal-setting assistant prompt: reflect, ask ≤3 clarifying questions one at a time, call propose_goals.", "status": "failing" },
+    { "id": "A010", "area": "api-chat", "name": "FluentValidation", "description": "ChatRequest validator: non-empty messages, sessionId within length limits. 400 on invalid input.", "status": "failing" },
+
+    { "id": "A011", "area": "api-decomposition", "name": "propose_goals kernel function", "description": "Semantic Kernel function with typed ProposedGoal/ProposedTask parameters. Forces structured JSON output.", "status": "failing" },
+    { "id": "A012", "area": "api-decomposition", "name": "Proposal SSE event", "description": "event: proposal with { goals: Goal[], tasks: Task[] } JSON payload when model calls propose_goals.", "status": "failing" },
+
+    { "id": "A013", "area": "assistant-frontend", "name": "Assistant page", "description": "src/app/assistant/page.tsx — 'use client' chat interface with brain dump prompt.", "status": "failing" },
+    { "id": "A014", "area": "assistant-frontend", "name": "useAssistant hook", "description": "src/hooks/useAssistant.ts — manages SSE connection, message state, proposal state, sendMessage().", "status": "failing" },
+    { "id": "A015", "area": "assistant-frontend", "name": "AssistantChat component", "description": "src/components/AssistantChat.tsx — message list + input, streaming token display.", "status": "failing" },
+    { "id": "A016", "area": "assistant-frontend", "name": "ProposalReview component", "description": "src/components/ProposalReview.tsx — edit goals/tasks inline, delete/add items, confirm writes to Supabase.", "status": "failing" },
+
+    { "id": "A017", "area": "api-mcp", "name": "MCP server setup", "description": "ModelContextProtocol.AspNetCore with HttpTransport. MomentumTools class.", "status": "failing" },
+    { "id": "A018", "area": "api-mcp", "name": "MCP tools: get_goals, get_tasks", "description": "Read tools querying Supabase via service-role key.", "status": "failing" },
+    { "id": "A019", "area": "api-mcp", "name": "MCP tools: create_goal, create_task, complete_task", "description": "Write tools mutating Supabase. brain_dump tool starts clarification flow.", "status": "failing" },
+
+    { "id": "A020", "area": "api-evals", "name": "Promptfoo config", "description": "api/evals/promptfooconfig.yaml with multiple providers (Claude Haiku/Sonnet, GPT-4o-mini/4o).", "status": "failing" },
+    { "id": "A021", "area": "api-evals", "name": "Eval test cases", "description": "Test cases: simple-goal, multi-goal, vague-input, already-clear. Schema + question-count scorers.", "status": "failing" },
+    { "id": "A022", "area": "api-evals", "name": "CI eval integration", "description": "GitHub Actions step runs promptfoo eval on PR to catch prompt regressions.", "status": "failing" },
+
+    { "id": "A023", "area": "api-deploy", "name": "Dockerfile", "description": "Multi-stage Dockerfile in api/ building .NET 10 API for Azure Container Apps.", "status": "failing" },
+    { "id": "A024", "area": "api-deploy", "name": "GitHub Actions deploy workflow", "description": "Build, push to Azure Container Registry, deploy to Container Apps on push to main.", "status": "failing" }
   ]
 }
