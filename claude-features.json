@@ -79,10 +79,10 @@
     { "id": "A011", "area": "api-decomposition", "name": "propose_goals kernel function", "description": "Semantic Kernel function with typed ProposedGoal/ProposedTask parameters. Forces structured JSON output.", "status": "passing" },
     { "id": "A012", "area": "api-decomposition", "name": "Proposal SSE event", "description": "event: proposal with { goals: Goal[], tasks: Task[] } JSON payload when model calls propose_goals.", "status": "passing" },
 
-    { "id": "A013", "area": "assistant-frontend", "name": "Assistant page", "description": "src/app/assistant/page.tsx — 'use client' chat interface with brain dump prompt.", "status": "failing" },
-    { "id": "A014", "area": "assistant-frontend", "name": "useAssistant hook", "description": "src/hooks/useAssistant.ts — manages SSE connection, message state, proposal state, sendMessage().", "status": "failing" },
-    { "id": "A015", "area": "assistant-frontend", "name": "AssistantChat component", "description": "src/components/AssistantChat.tsx — message list + input, streaming token display.", "status": "failing" },
-    { "id": "A016", "area": "assistant-frontend", "name": "ProposalReview component", "description": "src/components/ProposalReview.tsx — edit goals/tasks inline, delete/add items, confirm writes to Supabase.", "status": "failing" },
+    { "id": "A013", "area": "assistant-frontend", "name": "Assistant page", "description": "src/app/assistant/page.tsx — 'use client' chat interface with brain dump prompt.", "status": "passing" },
+    { "id": "A014", "area": "assistant-frontend", "name": "useAssistant hook", "description": "src/hooks/useAssistant.ts — manages SSE connection, message state, proposal state, sendMessage().", "status": "passing" },
+    { "id": "A015", "area": "assistant-frontend", "name": "AssistantChat component", "description": "src/components/AssistantChat.tsx — message list + input, streaming token display.", "status": "passing" },
+    { "id": "A016", "area": "assistant-frontend", "name": "ProposalReview component", "description": "src/components/ProposalReview.tsx — edit goals/tasks inline, delete/add items, confirm writes to Supabase.", "status": "passing" },
 
     { "id": "A017", "area": "api-mcp", "name": "MCP server setup", "description": "ModelContextProtocol.AspNetCore with HttpTransport. MomentumTools class.", "status": "failing" },
     { "id": "A018", "area": "api-mcp", "name": "MCP tools: get_goals, get_tasks", "description": "Read tools querying Supabase via service-role key.", "status": "failing" },
