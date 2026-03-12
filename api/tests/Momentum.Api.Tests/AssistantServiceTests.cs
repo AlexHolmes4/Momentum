@@ -18,7 +18,7 @@ public class AssistantServiceTests
             "test-session");
 
         var tokens = new List<string>();
-        await foreach (var chunk in service.StreamAsync(request, CancellationToken.None))
+        await foreach (var chunk in service.StreamAsync(request, "test-user", CancellationToken.None))
         {
             if (!chunk.IsProposal)
                 tokens.Add(chunk.Token!);
@@ -38,9 +38,9 @@ public class AssistantServiceTests
             "test-session");
 
         // Consume the stream
-        await foreach (var _ in service.StreamAsync(request, CancellationToken.None)) { }
+        await foreach (var _ in service.StreamAsync(request, "test-user", CancellationToken.None)) { }
 
-        var history = sessionStore.GetOrCreate("test-session");
+        var history = sessionStore.GetOrCreate("test-user:test-session");
         // system + user + assistant
         Assert.Equal(3, history.Count);
         Assert.Equal("I want to learn piano", history[1].Content);
@@ -57,9 +57,9 @@ public class AssistantServiceTests
             [new ChatMessage("user", "braindump")],
             "test-session");
 
-        await foreach (var _ in service.StreamAsync(request, CancellationToken.None)) { }
+        await foreach (var _ in service.StreamAsync(request, "test-user", CancellationToken.None)) { }
 
-        var history = sessionStore.GetOrCreate("test-session");
+        var history = sessionStore.GetOrCreate("test-user:test-session");
         Assert.Equal("Hello world", history[2].Content);
         Assert.Equal(AuthorRole.Assistant, history[2].Role);
     }
@@ -75,15 +75,15 @@ public class AssistantServiceTests
         var req1 = new ChatRequest(
             [new ChatMessage("user", "first")],
             "test-session");
-        await foreach (var _ in service.StreamAsync(req1, CancellationToken.None)) { }
+        await foreach (var _ in service.StreamAsync(req1, "test-user", CancellationToken.None)) { }
 
         // Second message — history should include first exchange
         var req2 = new ChatRequest(
             [new ChatMessage("user", "second")],
             "test-session");
-        await foreach (var _ in service.StreamAsync(req2, CancellationToken.None)) { }
+        await foreach (var _ in service.StreamAsync(req2, "test-user", CancellationToken.None)) { }
 
-        var history = sessionStore.GetOrCreate("test-session");
+        var history = sessionStore.GetOrCreate("test-user:test-session");
         // system + user1 + assistant1 + user2 + assistant2
         Assert.Equal(5, history.Count);
     }
@@ -99,7 +99,7 @@ public class AssistantServiceTests
             "test-proposal");
 
         StreamChunk? proposalChunk = null;
-        await foreach (var chunk in service.StreamAsync(request, CancellationToken.None))
+        await foreach (var chunk in service.StreamAsync(request, "test-user", CancellationToken.None))
         {
             if (chunk.IsProposal)
                 proposalChunk = chunk;
@@ -122,7 +122,7 @@ public class AssistantServiceTests
             "test-no-proposal");
 
         var hasProposal = false;
-        await foreach (var chunk in service.StreamAsync(request, CancellationToken.None))
+        await foreach (var chunk in service.StreamAsync(request, "test-user", CancellationToken.None))
         {
             if (chunk.IsProposal)
                 hasProposal = true;

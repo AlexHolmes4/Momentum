@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/tasks',     label: 'Tasks' },
   { href: '/goals',     label: 'Goals' },
+  { href: '/assistant', label: 'Assistant' },
   { href: '/archive',   label: 'Archive' },
 ]
 
@@ -72,7 +73,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
             href={item.href}
             onClick={() => setSidebarOpen(false)}
             className={`px-3 py-2 rounded-lg text-sm transition-colors ${
-              pathname === item.href
+              (pathname === item.href || pathname === item.href + '/')
                 ? 'bg-indigo-600 text-white'
                 : 'text-gray-400 hover:bg-gray-800 hover:text-white'
             }`}

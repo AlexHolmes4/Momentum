@@ -20,13 +20,15 @@ public class AssistantService
 
     public async IAsyncEnumerable<StreamChunk> StreamAsync(
         ChatRequest request,
+        string userId,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var sessionLock = _sessionStore.GetLock(request.SessionId);
+        var sessionKey = $"{userId}:{request.SessionId}";
+        var sessionLock = _sessionStore.GetLock(sessionKey);
         await sessionLock.WaitAsync(cancellationToken);
         try
         {
-            var history = _sessionStore.GetOrCreate(request.SessionId);
+            var history = _sessionStore.GetOrCreate(sessionKey);
 
             // Only the last message is appended — server-side history is the source of truth.
             var lastMessage = request.Messages[^1];
