@@ -23,6 +23,12 @@ Items discovered during implementation that were deferred. Grouped by the featur
 ### Frontend Session 9 — Dashboard
 - [ ] Goal progress always 0% on dashboard (completed tasks are archived, only active tasks counted)
 
+### Frontend Session 5 — Assistant Frontend (A013-A016)
+- [ ] Accessibility: add `aria-live="polite"` region for streaming assistant messages (screen reader support)
+- [ ] Auto-scroll performance: debounce `scrollIntoView` during token streaming (fires per token currently)
+- [ ] Regression test: add API test verifying two different users with same sessionId get isolated histories
+- [ ] Priority validation: ProposalReview should validate task priority before Supabase write (currently trusts AI output)
+
 ## Future Enhancements
 
 New ideas and features not yet tied to implementation sessions.

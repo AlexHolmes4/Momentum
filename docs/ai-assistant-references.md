@@ -34,6 +34,11 @@ For this feature, use **Semantic Kernel** for orchestration, built on **Microsof
 | SK streaming API: GetStreamingChatMessageContentsAsync | https://learn.microsoft.com/en-us/dotnet/api/microsoft.semantickernel.chatcompletion.ichatcompletionservice.getstreamingchatmessagecontentsasync?view=semantic-kernel-dotnet |
 | SK ChatCompletionAgent | https://learn.microsoft.com/en-us/semantic-kernel/frameworks/agent/agent-types/chat-completion-agent |
 | SK OpenAI Streaming Sample | https://github.com/microsoft/semantic-kernel/blob/main/dotnet/samples/Concepts/ChatCompletion/OpenAI_ChatCompletionStreaming.cs |
+| Microsoft Agent Framework Overview (Microsoft Learn) | https://learn.microsoft.com/en-us/agent-framework/overview/ |
+| Migration Guide from Semantic Kernel | https://learn.microsoft.com/en-us/agent-framework/migration-guide/from-semantic-kernel/ |
+| Migration Guide from AutoGen | https://learn.microsoft.com/en-us/agent-framework/migration-guide/from-autogen/ |
+
+**Key update (2026-03):** Microsoft Agent Framework is now in **public preview** (v1.0rc4 Python, prerelease NuGet for .NET). It is the direct successor to both Semantic Kernel and AutoGen, created by the same teams. NuGet packages: `Microsoft.Agents.AI`, `Microsoft.Agents.AI.OpenAI`. Python: `pip install agent-framework --pre`. SK remains appropriate for existing projects and migrates cleanly.
 
 ## Model Context Protocol (MCP)
 
@@ -129,3 +134,45 @@ Both providers now have native structured output — schema is compiled to a gra
 | Azure Container Apps Plan Types | https://learn.microsoft.com/en-us/azure/container-apps/plans |
 | Azure Functions Pricing (for reference — not recommended for SSE) | https://azure.microsoft.com/en-us/pricing/details/functions/ |
 | fly.io vs Railway comparison (2026) | https://thesoftwarescout.com/fly-io-vs-railway-2026-which-developer-platform-should-you-deploy-on/ |
+
+## Anthropic — Building Effective Agents
+
+| Topic | URL |
+|-------|-----|
+| Building Effective Agents (Anthropic Engineering blog) | https://www.anthropic.com/engineering/building-effective-agents |
+
+**Key patterns (from the article):**
+
+The article distinguishes **workflows** (predefined code paths orchestrating LLMs) from **agents** (LLMs dynamically directing their own tool usage). Five workflow patterns are described in increasing complexity:
+
+1. **Prompt Chaining** — sequential steps, each LLM call processes previous output
+2. **Routing** — classify input, dispatch to specialized handlers
+3. **Parallelization** — run tasks simultaneously (sectioning or voting)
+4. **Orchestrator-Workers** — central LLM dynamically delegates to worker LLMs
+5. **Evaluator-Optimizer** — iterative refinement with evaluation feedback
+
+**Core principle:** "Success in the LLM space isn't about building the most sophisticated system. It's about building the right system for your needs." Start simple — optimized prompts with retrieval often suffice. Only add agent complexity when demonstrated performance gains justify it.
+
+**Three pillars:** simplicity in design, transparency in planning, meticulous tool/interface documentation.
+
+## Claude Code — Best Practices & Architecture
+
+| Topic | URL |
+|-------|-----|
+| Claude Code Best Practices | https://code.claude.com/docs/en/best-practices |
+| How Claude Code Works (agentic loop, tools, context) | https://code.claude.com/docs/en/how-claude-code-works |
+| Claude Code Subagents | https://code.claude.com/docs/en/sub-agents |
+| Claude Code Common Workflows | https://code.claude.com/docs/en/common-workflows |
+| Claude Code Extend / Features Overview | https://code.claude.com/docs/en/features-overview |
+| Claude Code Skills | https://code.claude.com/docs/en/skills |
+| Claude Code Documentation Index (llms.txt) | https://code.claude.com/docs/llms.txt |
+
+**Key takeaways:**
+
+- **Context window is the #1 resource to manage.** Performance degrades as it fills. Use `/clear` between unrelated tasks, use subagents to isolate verbose operations, use `/compact` to summarize.
+- **Give Claude verification criteria** (tests, screenshots, expected outputs) — the single highest-leverage practice.
+- **Explore → Plan → Implement → Commit** — separate research/planning from coding.
+- **Subagents** run in isolated context windows. Three built-in types: Explore (Haiku, read-only), Plan (inherited model, read-only), General-purpose (inherited model, all tools). Custom subagents defined in `.claude/agents/` with YAML frontmatter.
+- **Skills** (`.claude/skills/`) load on demand vs CLAUDE.md which loads every session — use skills for domain knowledge that's only sometimes relevant.
+- **Parallel sessions** via git worktrees, desktop app, or agent teams for independent work streams.
+- **Non-interactive mode** (`claude -p "prompt"`) for CI/CD integration and fan-out patterns.
