@@ -111,16 +111,19 @@ app.MapPost("/api/assistant/chat", async (
     ChatRequest req,
     IValidator<ChatRequest> validator,
     AssistantService assistant,
-    HttpContext ctx) =>
+    HttpContext ctx,
+    ClaimsPrincipal user) =>
 {
     var validationResult = await validator.ValidateAsync(req);
     if (!validationResult.IsValid)
         return Results.ValidationProblem(validationResult.ToDictionary());
 
+    var userId = user.FindFirst("sub")?.Value ?? "anonymous";
+
     async IAsyncEnumerable<SseItem<object>> StreamEvents(
         [EnumeratorCancellation] CancellationToken ct)
     {
-        await foreach (var chunk in assistant.StreamAsync(req, ct))
+        await foreach (var chunk in assistant.StreamAsync(req, userId, ct))
         {
             if (chunk.IsProposal)
                 yield return new SseItem<object>(chunk.Proposal!, "proposal");
