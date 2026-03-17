@@ -5,8 +5,8 @@ using System.Text;
 using System.Threading.RateLimiting;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.AI;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.SemanticKernel.ChatCompletion;
 using Momentum.Api.Models;
 using Momentum.Api.Services;
 
@@ -68,10 +68,22 @@ builder.Services.AddSingleton<SessionStore>();
 // Assistant service — orchestrates AI streaming
 builder.Services.AddScoped<AssistantService>();
 
-// Placeholder AI service — replaced by real connector when ANTHROPIC_API_KEY is configured
-builder.Services.AddSingleton<IChatCompletionService>(sp =>
+// IChatClient — placeholder, replaced by real Anthropic connector when ANTHROPIC_API_KEY is configured
+builder.Services.AddSingleton<IChatClient>(sp =>
     throw new InvalidOperationException(
         "No AI model configured. Set ANTHROPIC_API_KEY environment variable."));
+
+// Supabase data service — PostgREST CRUD with per-request JWT passthrough
+builder.Services.AddHttpClient<SupabaseDataService>(client =>
+{
+    client.BaseAddress = new Uri(supabaseUrl);
+});
+builder.Services.AddHttpContextAccessor();
+
+// MCP server — Streamable HTTP transport with tools auto-discovered from assembly
+builder.Services.AddMcpServer()
+    .WithHttpTransport()
+    .WithToolsFromAssembly();
 
 // Per-user rate limiting — thresholds from appsettings.json
 var rateLimitPermit = builder.Configuration.GetValue("RateLimit:PermitLimit", 10);
@@ -135,6 +147,9 @@ app.MapPost("/api/assistant/chat", async (
 
     return (IResult)TypedResults.ServerSentEvents(StreamEvents(ctx.RequestAborted));
 }).RequireAuthorization().RequireRateLimiting("per-user");
+
+// MCP endpoint — Streamable HTTP transport, requires JWT auth
+app.MapMcp().RequireAuthorization();
 
 app.Run();
 
