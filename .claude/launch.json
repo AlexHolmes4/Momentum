@@ -3,9 +3,15 @@
   "configurations": [
     {
       "name": "Momentum Dev",
-      "runtimeExecutable": "cmd",
-      "runtimeArgs": ["/c", "npm run dev"],
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
       "port": 11001
+    },
+    {
+      "name": "Momentum API",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": ["run", "--project", "api/src/Momentum.Api"],
+      "port": 5061
     }
   ]
 }
