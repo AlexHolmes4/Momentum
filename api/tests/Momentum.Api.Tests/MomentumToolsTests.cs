@@ -1,9 +1,10 @@
 using System.Net;
 using System.Text.Json;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Momentum.Api.Models;
 using Momentum.Api.Services;
 using Momentum.Api.Tools;
-using Microsoft.Extensions.Configuration;
 
 namespace Momentum.Api.Tests;
 
@@ -22,7 +23,13 @@ public class MomentumToolsTests
             })
             .Build();
         var dataService = new SupabaseDataService(httpClient, config);
-        return new MomentumTools(dataService);
+
+        // Create a fake IHttpContextAccessor with a Bearer token
+        var httpContext = new DefaultHttpContext();
+        httpContext.Request.Headers.Authorization = $"Bearer {TestJwt}";
+        var accessor = new HttpContextAccessor { HttpContext = httpContext };
+
+        return new MomentumTools(dataService, accessor);
     }
 
     [Fact]
@@ -32,7 +39,7 @@ public class MomentumToolsTests
         var handler = new MockHttpHandler(HttpStatusCode.OK, JsonSerializer.Serialize(goals));
         var tools = CreateTools(handler);
 
-        var result = await tools.GetGoals(TestJwt, CancellationToken.None);
+        var result = await tools.GetGoals(CancellationToken.None);
 
         Assert.Single(result);
         Assert.Equal("Goal", result[0].Title);
@@ -45,7 +52,7 @@ public class MomentumToolsTests
         var handler = new MockHttpHandler(HttpStatusCode.Created, JsonSerializer.Serialize(created));
         var tools = CreateTools(handler);
 
-        var result = await tools.CreateGoal(TestJwt, "New", null, null, CancellationToken.None);
+        var result = await tools.CreateGoal("New", null, null, CancellationToken.None);
 
         Assert.Equal("New", result.Title);
     }

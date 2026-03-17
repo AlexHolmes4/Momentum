@@ -68,10 +68,29 @@ builder.Services.AddSingleton<SessionStore>();
 // Assistant service — orchestrates AI streaming
 builder.Services.AddScoped<AssistantService>();
 
-// IChatClient — placeholder, replaced by real Anthropic connector when ANTHROPIC_API_KEY is configured
-builder.Services.AddSingleton<IChatClient>(sp =>
-    throw new InvalidOperationException(
-        "No AI model configured. Set ANTHROPIC_API_KEY environment variable."));
+// Anthropic SDK — IChatClient with function invocation pipeline
+// AnthropicClient reads ANTHROPIC_API_KEY from env by default. In tests, replaced via DI override.
+var anthropicApiKey = Environment.GetEnvironmentVariable("ANTHROPIC_API_KEY");
+var anthropicModel = builder.Configuration["Anthropic:Model"] ?? "claude-sonnet-4-5-20250929";
+
+if (!string.IsNullOrEmpty(anthropicApiKey))
+{
+    builder.Services.AddSingleton<IChatClient>(sp =>
+    {
+        var client = new Anthropic.AnthropicClient();
+        return client.AsIChatClient(anthropicModel)
+            .AsBuilder()
+            .UseFunctionInvocation()
+            .Build();
+    });
+}
+else
+{
+    // Placeholder for tests — real Anthropic key required in production
+    builder.Services.AddSingleton<IChatClient>(sp =>
+        throw new InvalidOperationException(
+            "No AI model configured. Set ANTHROPIC_API_KEY environment variable."));
+}
 
 // Supabase data service — PostgREST CRUD with per-request JWT passthrough
 builder.Services.AddHttpClient<SupabaseDataService>(client =>
@@ -130,12 +149,13 @@ app.MapPost("/api/assistant/chat", async (
     if (!validationResult.IsValid)
         return Results.ValidationProblem(validationResult.ToDictionary());
 
-    var userId = user.FindFirst("sub")?.Value ?? "anonymous";
+    // Extract the raw JWT for tool closures (RLS enforcement via PostgREST)
+    var userJwt = ctx.Request.Headers.Authorization.ToString().Replace("Bearer ", "");
 
     async IAsyncEnumerable<SseItem<object>> StreamEvents(
         [EnumeratorCancellation] CancellationToken ct)
     {
-        await foreach (var chunk in assistant.StreamAsync(req, userId, ct))
+        await foreach (var chunk in assistant.StreamAsync(req, userJwt, ct))
         {
             if (chunk.IsProposal)
                 yield return new SseItem<object>(chunk.Proposal!, "proposal");
