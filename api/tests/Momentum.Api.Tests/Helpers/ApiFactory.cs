@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.SemanticKernel.ChatCompletion;
+using Momentum.Api.Services;
 
 namespace Momentum.Api.Tests.Helpers;
 
@@ -11,20 +12,21 @@ public class ApiFactory : WebApplicationFactory<Program>
     {
         builder.UseSetting("Supabase:JwtSecret", JwtHelper.TestSecret);
         builder.UseSetting("Supabase:Url", "https://test.supabase.co");
+        builder.UseSetting("Supabase:PublishableKey", "sb_test_key");
         builder.UseSetting("RateLimit:PermitLimit", "10");
         builder.UseSetting("RateLimit:WindowSeconds", "60");
 
         builder.ConfigureServices(services =>
         {
-            // Remove any existing IChatCompletionService registration
+            // Remove any existing IChatClient registration
             var descriptor = services.FirstOrDefault(
-                d => d.ServiceType == typeof(IChatCompletionService));
+                d => d.ServiceType == typeof(IChatClient));
             if (descriptor != null)
                 services.Remove(descriptor);
 
             // Register fake so tests don't throw on startup
-            services.AddSingleton<IChatCompletionService>(
-                new FakeChatCompletionService("Hello", " from", " AI"));
+            services.AddSingleton<IChatClient>(
+                new FakeChatClient("Hello", " from", " AI"));
         });
     }
 }
@@ -35,43 +37,19 @@ public class ChatApiFactory : WebApplicationFactory<Program>
     {
         builder.UseSetting("Supabase:JwtSecret", JwtHelper.TestSecret);
         builder.UseSetting("Supabase:Url", "https://test.supabase.co");
+        builder.UseSetting("Supabase:PublishableKey", "sb_test_key");
         builder.UseSetting("RateLimit:PermitLimit", "100");
         builder.UseSetting("RateLimit:WindowSeconds", "60");
 
         builder.ConfigureServices(services =>
         {
-            // Remove any existing IChatCompletionService registration
             var descriptor = services.FirstOrDefault(
-                d => d.ServiceType == typeof(IChatCompletionService));
+                d => d.ServiceType == typeof(IChatClient));
             if (descriptor != null)
                 services.Remove(descriptor);
 
-            // Register fake
-            services.AddSingleton<IChatCompletionService>(
-                new FakeChatCompletionService("Hello", " from", " AI"));
-        });
-    }
-}
-
-public class ProposalApiFactory : WebApplicationFactory<Program>
-{
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
-    {
-        builder.UseSetting("Supabase:JwtSecret", JwtHelper.TestSecret);
-        builder.UseSetting("Supabase:Url", "https://test.supabase.co");
-        builder.UseSetting("RateLimit:PermitLimit", "100");
-        builder.UseSetting("RateLimit:WindowSeconds", "60");
-
-        builder.ConfigureServices(services =>
-        {
-            // Remove any existing IChatCompletionService registration
-            var descriptor = services.FirstOrDefault(
-                d => d.ServiceType == typeof(IChatCompletionService));
-            if (descriptor != null)
-                services.Remove(descriptor);
-
-            // Register fake that simulates propose_goals function call
-            services.AddSingleton<IChatCompletionService>(new FakeProposalChatService());
+            services.AddSingleton<IChatClient>(
+                new FakeChatClient("Hello", " from", " AI"));
         });
     }
 }

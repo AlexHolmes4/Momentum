@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.Extensions.AI;
 using Momentum.Api.Models;
+using AiChatMessage = Microsoft.Extensions.AI.ChatMessage;
 
 namespace Momentum.Api.Services;
 
@@ -21,7 +22,7 @@ public class AssistantService(IChatClient chatClient, SessionStore sessionStore)
 
             // Only the last message is appended — server-side history is the source of truth.
             var lastMessage = request.Messages[^1];
-            history.Add(new ChatMessage(
+            history.Add(new AiChatMessage(
                 new ChatRole(lastMessage.Role), lastMessage.Content));
 
             // Stream response
@@ -37,7 +38,7 @@ public class AssistantService(IChatClient chatClient, SessionStore sessionStore)
 
             // Append assistant response to history
             if (fullResponse.Length > 0)
-                history.Add(new ChatMessage(ChatRole.Assistant, fullResponse.ToString()));
+                history.Add(new AiChatMessage(ChatRole.Assistant, fullResponse.ToString()));
         }
         finally
         {

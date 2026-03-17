@@ -18,7 +18,7 @@ public class FakeChatClient : IChatClient
     public ChatClientMetadata Metadata => new("FakeProvider", null, "fake-model");
 
     public Task<ChatResponse> GetResponseAsync(
-        IList<ChatMessage> chatMessages,
+        IEnumerable<ChatMessage> chatMessages,
         ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -28,7 +28,7 @@ public class FakeChatClient : IChatClient
     }
 
     public async IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(
-        IList<ChatMessage> chatMessages,
+        IEnumerable<ChatMessage> chatMessages,
         ChatOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
@@ -38,12 +38,12 @@ public class FakeChatClient : IChatClient
             yield return new ChatResponseUpdate
             {
                 Role = ChatRole.Assistant,
-                Text = chunk
+                Contents = [new TextContent(chunk)]
             };
         }
     }
 
-    public TService? GetService<TService>(object? key = null) where TService : class => null;
+    public object? GetService(Type serviceType, object? key = null) => null;
 
     public void Dispose() { }
 }
