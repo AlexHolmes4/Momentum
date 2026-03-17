@@ -406,3 +406,49 @@ NOTES:
 NEXT:
   API Session 4 or Frontend Session: A013-A016 (Assistant page, useAssistant hook, AssistantChat, ProposalReview)
 ---
+
+---
+[Session 5 — Assistant Frontend — 2026-03-16]
+STATUS: Complete
+BRANCH: develop
+COMPLETED:
+  - A013: src/app/assistant/page.tsx — assistant page with chat interface
+  - A014: src/hooks/useAssistant.ts — SSE connection, message state, proposal state
+  - A015: src/components/AssistantChat.tsx — message list + input, streaming token display
+  - A016: src/components/ProposalReview.tsx — edit goals/tasks inline, confirm writes to Supabase
+NOTES:
+  - Completed in prior session (already merged to develop)
+---
+
+---
+[API Session 4 — MCP Server + SDK Migration — 2026-03-16]
+STATUS: Complete
+BRANCH: develop
+COMPLETED:
+  - A017: MCP server setup — ModelContextProtocol.AspNetCore with Streamable HTTP transport
+  - A018: MCP read tools — get_goals, get_tasks via SupabaseDataService with user JWT passthrough
+  - A019: MCP write tools — create_goal, create_task, complete_task, propose_goals, brain_dump
+  - Migrated from Semantic Kernel to Anthropic C# SDK + Microsoft.Extensions.AI (IChatClient)
+  - SupabaseDataService — PostgREST CRUD with per-request JWT passthrough for RLS enforcement
+  - MomentumTools — [McpServerToolType] class with 7 MCP tools
+  - SessionStore — migrated from SK ChatHistory to List<ChatMessage> (M.E.AI)
+  - AssistantService — rewritten from SK Kernel to IChatClient streaming
+  - FakeChatClient — new IChatClient test helper replacing SK fakes
+  - Updated Program.cs DI: IChatClient + MCP server + SupabaseDataService
+  - Deleted SK files: GoalProposalPlugin, FakeChatCompletionService, FakeProposalChatService
+  - Design doc: docs/plans/2026-03-16-mcp-and-sdk-migration-design.md
+  - Implementation plan: docs/plans/2026-03-16-mcp-and-sdk-migration-plan.md
+  - Updated docs/ai-assistant-references.md for new tech stack
+VERIFIED:
+  - dotnet test passes (39 tests — includes new SupabaseDataService, MomentumTools, MCP endpoint tests)
+  - All existing tests (auth, CORS, rate limiting, health, validation, chat endpoint) still pass
+  - MCP endpoint requires JWT auth (integration tested)
+NOTES:
+  - NuGet changes: Removed Microsoft.SemanticKernel 1.73.0, Added Anthropic + Microsoft.Extensions.AI + ModelContextProtocol.AspNetCore
+  - Auth model: User JWT passthrough → PostgREST → Supabase RLS (no service-role key)
+  - IChatClient registered as placeholder (throws) — replaced by AnthropicClient.AsIChatClient() when ANTHROPIC_API_KEY set
+  - MCP tools accept userJwt as parameter for unit testability; real JWT extraction via IHttpContextAccessor in production
+  - Dual exposure: AIFunction tools for chat assistant, [McpServerTool] for external MCP clients
+NEXT:
+  A020-A022: Promptfoo eval config, test cases, CI integration
+---

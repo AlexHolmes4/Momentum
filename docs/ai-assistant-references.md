@@ -1,6 +1,6 @@
 # AI Goal-Setting Assistant — Technology References
 
-Verified documentation links for the AI assistant feature's tech stack. Web-searched 2026-03-09. Updated as new sessions discover additional resources.
+Verified documentation links for the AI assistant feature's tech stack. Web-searched 2026-03-09. Updated 2026-03-16 — migrating from Semantic Kernel to Anthropic SDK + IChatClient + MCP C# SDK.
 
 ---
 
@@ -11,34 +11,85 @@ Three complementary layers exist — they are not competing:
 | Layer | Package | Role |
 |-------|---------|------|
 | `Microsoft.Extensions.AI` | `Microsoft.Extensions.AI` | Lowest-level: `IChatClient`, `IEmbeddingGenerator` — provider-agnostic primitives (GA) |
-| Semantic Kernel | `Microsoft.SemanticKernel` | Orchestration: plugins, function calling, memory, multi-agent, MCP (recommended for this feature) |
-| Microsoft Agent Framework | `Microsoft.AI.Agents` | Top-level: graph workflows, A2A, checkpointing, human-in-the-loop (still maturing) |
+| Semantic Kernel | `Microsoft.SemanticKernel` | Orchestration: plugins, function calling, memory, multi-agent, MCP |
+| Microsoft Agent Framework | `Microsoft.Agents.AI` | Top-level: graph workflows, A2A, checkpointing, human-in-the-loop (public preview/RC) |
 
-For this feature, use **Semantic Kernel** for orchestration, built on **Microsoft.Extensions.AI** for provider abstraction.
+### Our approach (decided 2026-03-16)
 
-**Key note (2026):** Microsoft recommends Semantic Kernel v1.x for existing/near-term projects. For new projects, **Microsoft Agent Framework** (SK + AutoGen unified) is the future direction. Semantic Kernel is appropriate and will migrate cleanly.
+Use the **Anthropic C# SDK** (`Anthropic` NuGet) with its `IChatClient` integration (`Microsoft.Extensions.AI`), combined with the **MCP C# SDK** (`ModelContextProtocol`) for tool serving. This replaces Semantic Kernel.
 
-## Microsoft Agent Framework & Semantic Kernel
+**Why this approach:**
+- The official Anthropic C# SDK provides `IChatClient` via `client.AsIChatClient()`, which is the `Microsoft.Extensions.AI` abstraction
+- MCP tools from the MCP C# SDK work directly with `IChatClient` — shown in Anthropic's own docs
+- Fewer dependencies, no prerelease packages, stable foundation
+- Avoids Semantic Kernel's `Kernel`/`Plugin`/`KernelFunction` ceremony
+- Microsoft Agent Framework is the SK successor but still prerelease — we can migrate later if needed
+
+**Migration from Semantic Kernel:**
+
+| Before (Semantic Kernel) | After (Anthropic SDK + IChatClient) |
+|---|---|
+| `Microsoft.SemanticKernel` v1.73.0 | `Anthropic` NuGet (official SDK, v10+) |
+| `Kernel` + `IChatCompletionService` | `AnthropicClient.AsIChatClient()` → `IChatClient` |
+| `[KernelFunction]` + plugin classes | `AIFunctionFactory.Create()` or `McpServerTool` |
+| `ChatHistory` + custom `SessionStore` | `IChatClient` with manual message list (or thin wrapper) |
+| `FunctionChoiceBehavior.Auto()` | `.AsBuilder().UseFunctionInvocation().Build()` |
+| `GetStreamingChatMessageContentsAsync` | `chatClient.GetStreamingResponseAsync()` |
+
+**Key note (2026-03):** Microsoft Agent Framework (`Microsoft.Agents.AI`) is now the direct successor to both Semantic Kernel and AutoGen (same teams, public preview). For projects needing agent sessions, middleware, multi-agent workflows, or graph-based orchestration, Agent Framework is the recommended path. Our assistant is simple enough that `IChatClient` + MCP covers our needs without the extra layer.
+
+## Anthropic C# SDK (our primary AI package)
 
 | Topic | URL |
 |-------|-----|
-| Semantic Kernel Docs (Microsoft Learn) | https://learn.microsoft.com/en-us/semantic-kernel/ |
-| Semantic Kernel Agent Framework | https://learn.microsoft.com/en-us/semantic-kernel/frameworks/agent/ |
-| Microsoft.Extensions.AI | https://learn.microsoft.com/en-us/dotnet/ai/microsoft-extensions-ai |
-| .NET + AI Ecosystem overview | https://learn.microsoft.com/en-us/dotnet/ai/dotnet-ai-ecosystem |
-| Microsoft Agent Framework announcement | https://devblogs.microsoft.com/semantic-kernel/semantic-kernel-and-microsoft-agent-framework/ |
-| Microsoft Agent Framework GitHub | https://github.com/microsoft/agent-framework |
-| Microsoft Agent Framework — First Agent Quickstart | https://learn.microsoft.com/en-us/agent-framework/get-started/your-first-agent |
-| SK + Microsoft Agent Framework (Visual Studio Magazine, Oct 2025) | https://visualstudiomagazine.com/articles/2025/10/01/semantic-kernel-autogen--open-source-microsoft-agent-framework.aspx |
-| Semantic Kernel GitHub | https://github.com/microsoft/semantic-kernel |
-| SK streaming API: GetStreamingChatMessageContentsAsync | https://learn.microsoft.com/en-us/dotnet/api/microsoft.semantickernel.chatcompletion.ichatcompletionservice.getstreamingchatmessagecontentsasync?view=semantic-kernel-dotnet |
-| SK ChatCompletionAgent | https://learn.microsoft.com/en-us/semantic-kernel/frameworks/agent/agent-types/chat-completion-agent |
-| SK OpenAI Streaming Sample | https://github.com/microsoft/semantic-kernel/blob/main/dotnet/samples/Concepts/ChatCompletion/OpenAI_ChatCompletionStreaming.cs |
-| Microsoft Agent Framework Overview (Microsoft Learn) | https://learn.microsoft.com/en-us/agent-framework/overview/ |
-| Migration Guide from Semantic Kernel | https://learn.microsoft.com/en-us/agent-framework/migration-guide/from-semantic-kernel/ |
-| Migration Guide from AutoGen | https://learn.microsoft.com/en-us/agent-framework/migration-guide/from-autogen/ |
+| Anthropic C# SDK docs | https://platform.claude.com/docs/en/api/sdks/csharp |
+| Anthropic C# SDK GitHub | https://github.com/anthropics/anthropic-sdk-csharp |
+| Anthropic C# SDK NuGet | https://www.nuget.org/packages/Anthropic |
+| Anthropic API reference | https://platform.claude.com/docs/en/api/overview |
+| Anthropic streaming guide | https://platform.claude.com/docs/en/build-with-claude/streaming |
+| Anthropic tool use guide | https://platform.claude.com/docs/en/build-with-claude/tool-use |
 
-**Key update (2026-03):** Microsoft Agent Framework is now in **public preview** (v1.0rc4 Python, prerelease NuGet for .NET). It is the direct successor to both Semantic Kernel and AutoGen, created by the same teams. NuGet packages: `Microsoft.Agents.AI`, `Microsoft.Agents.AI.OpenAI`. Python: `pip install agent-framework --pre`. SK remains appropriate for existing projects and migrates cleanly.
+**Key patterns:**
+- `AnthropicClient` → `client.AsIChatClient("model")` provides `IChatClient` (`Microsoft.Extensions.AI`)
+- `.AsBuilder().UseFunctionInvocation().Build()` enables automatic tool/function calling
+- `client.Messages.CreateStreaming()` for raw streaming; `IChatClient.GetStreamingResponseAsync()` for abstracted streaming
+- MCP tools from `ModelContextProtocol` SDK work directly with `IChatClient` via `ChatOptions.Tools`
+
+```csharp
+// Example: Anthropic SDK + IChatClient + MCP tools
+IChatClient chatClient = new AnthropicClient().AsIChatClient("claude-sonnet-4-5-20250929")
+    .AsBuilder()
+    .UseFunctionInvocation()
+    .Build();
+
+ChatOptions options = new() { Tools = [.. await mcpServer.ListToolsAsync()] };
+await chatClient.GetResponseAsync("...", options);
+```
+
+## Microsoft.Extensions.AI
+
+| Topic | URL |
+|-------|-----|
+| Microsoft.Extensions.AI docs | https://learn.microsoft.com/en-us/dotnet/ai/microsoft-extensions-ai |
+| .NET + AI Ecosystem overview | https://learn.microsoft.com/en-us/dotnet/ai/dotnet-ai-ecosystem |
+| IChatClient API reference | https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.ai.ichatclient |
+| AIFunctionFactory API reference | https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.ai.aifunctionfactory |
+
+**Key note:** `Microsoft.Extensions.AI` is the GA provider-agnostic abstraction layer. The Anthropic SDK implements `IChatClient` via `AsIChatClient()`. This is the interface MCP tools and function calling plug into.
+
+## Microsoft Agent Framework & Semantic Kernel (reference)
+
+| Topic | URL |
+|-------|-----|
+| Microsoft Agent Framework Overview | https://learn.microsoft.com/en-us/agent-framework/overview/ |
+| Microsoft Agent Framework GitHub | https://github.com/microsoft/agent-framework |
+| Agent Framework Anthropic Provider | https://learn.microsoft.com/en-us/agent-framework/agents/providers/anthropic |
+| Agent Framework MCP Tools | https://learn.microsoft.com/en-us/agent-framework/user-guide/model-context-protocol/using-mcp-tools |
+| Migration Guide from Semantic Kernel | https://learn.microsoft.com/en-us/agent-framework/migration-guide/from-semantic-kernel/ |
+| Semantic Kernel Docs | https://learn.microsoft.com/en-us/semantic-kernel/ |
+| Semantic Kernel GitHub | https://github.com/microsoft/semantic-kernel |
+
+**Status (2026-03):** Microsoft Agent Framework is in **public preview/RC**. It is the direct successor to both Semantic Kernel and AutoGen (same teams). NuGet: `Microsoft.Agents.AI`, `Microsoft.Agents.AI.Anthropic`. We are not using it currently but it is the natural upgrade path if we need agent sessions, middleware, or multi-agent orchestration in the future.
 
 ## Model Context Protocol (MCP)
 
@@ -46,19 +97,15 @@ For this feature, use **Semantic Kernel** for orchestration, built on **Microsof
 |-------|-----|
 | MCP Official Docs | https://modelcontextprotocol.io |
 | MCP Specification (2025-11-25) | https://modelcontextprotocol.io/specification/2025-11-25 |
+| MCP Authorization Spec | https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization |
 | MCP GitHub Organization | https://github.com/modelcontextprotocol |
 | MCP C# SDK GitHub | https://github.com/modelcontextprotocol/csharp-sdk |
 | MCP C# SDK API Docs | https://modelcontextprotocol.github.io/csharp-sdk/ |
 | Build an MCP server in C# (.NET Blog) | https://devblogs.microsoft.com/dotnet/build-a-model-context-protocol-mcp-server-in-csharp/ |
 | MCP C# SDK v1.0 release | https://devblogs.microsoft.com/dotnet/release-v10-of-the-official-mcp-csharp-sdk/ |
-| SK + MCP integration guide | https://devblogs.microsoft.com/semantic-kernel/integrating-model-context-protocol-tools-with-semantic-kernel-a-step-by-step-guide/ |
-| Give SK agents access to MCP servers | https://learn.microsoft.com/en-us/semantic-kernel/concepts/plugins/adding-mcp-plugins |
-| Building an MCP server with SK | https://devblogs.microsoft.com/semantic-kernel/building-a-model-context-protocol-server-with-semantic-kernel/ |
-| MCP TypeScript SDK | https://github.com/modelcontextprotocol/typescript-sdk |
-| MCP Python build guide | https://modelcontextprotocol.io/docs/develop/build-server |
+| Anthropic SDK IChatClient + MCP example | https://platform.claude.com/docs/en/api/sdks/csharp (see IChatClient integration section) |
 | MCP SDK overview | https://modelcontextprotocol.io/docs/sdk |
 | MCP features guide (Tools/Resources/Prompts) | https://workos.com/blog/mcp-features-guide |
-| Build MCP server in TypeScript (FreeCodeCamp) | https://www.freecodecamp.org/news/how-to-build-a-custom-mcp-server-with-typescript-a-handbook-for-developers/ |
 
 ### MCP Server Primitives
 
@@ -84,13 +131,10 @@ For this feature, use **Semantic Kernel** for orchestration, built on **Microsof
 | Topic | URL |
 |-------|-----|
 | SSE in ASP.NET Core + .NET 10 (Milan Jovanović) | https://www.milanjovanovic.tech/blog/server-sent-events-in-aspnetcore-and-dotnet-10 |
-| SSE + Semantic Kernel streaming chat | https://www.petkir.at/blog/semantic-kernel/01_chat_03_sse |
 | SSE in ASP.NET Core (antondevtips) | https://antondevtips.com/blog/real-time-server-sent-events-in-asp-net-core |
 | Pragmatic SSE Guide (Roxeem) | https://roxeem.com/2025/10/24/a-pragmatic-guide-to-server-sent-events-sse-in-asp-net-core/ |
-| SSE MCP Server in .NET (Medium) | https://medium.com/@hany.habib1988/building-a-server-sent-event-sse-mcp-server-with-net-core-c-48ac55000336 |
-| Real-Time AI Streaming with Azure OpenAI (Microsoft Community Hub) | https://techcommunity.microsoft.com/blog/azuredevcommunityblog/real%E2%80%91time-ai-streaming-with-azure-openai-and-signalr/4468833 |
 
-**Key note:** .NET 10 adds native `TypedResults.ServerSentEvents` / `Results.ServerSentEvents` with `IAsyncEnumerable<T>`. For earlier .NET versions, set `Content-Type: text/event-stream` and write `data: ...\n\n` manually. The SK streaming primitive is `IChatCompletionService.GetStreamingChatMessageContentsAsync()` returning `IAsyncEnumerable<StreamingChatMessageContent>`.
+**Key note:** .NET 10 adds native `TypedResults.ServerSentEvents` / `Results.ServerSentEvents` with `IAsyncEnumerable<T>`. The `IChatClient.GetStreamingResponseAsync()` from `Microsoft.Extensions.AI` returns `IAsyncEnumerable<ChatResponseUpdate>` which maps naturally to SSE events.
 
 ## LLM Evaluation
 
@@ -122,7 +166,7 @@ Both providers now have native structured output — schema is compiled to a gra
 **Key notes:**
 - Anthropic native structured outputs require beta header: `anthropic-beta: structured-outputs-2025-11-13` (Claude Sonnet 4.5+, Opus 4.1+)
 - Format guarantees schema compliance, not semantic correctness — numerical ranges and business logic still need post-response validation
-- For cross-provider consistency with SK, use `RetainArgumentTypes = true` in execution settings
+- The Anthropic C# SDK supports structured outputs via the Messages API; `IChatClient` tool results use standard JSON serialization
 
 ## Hosting
 

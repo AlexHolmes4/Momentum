@@ -76,7 +76,7 @@
     { "id": "A009", "area": "api-chat", "name": "System prompt", "description": "Goal-setting assistant prompt: reflect, ask ≤3 clarifying questions one at a time, call propose_goals.", "status": "passing" },
     { "id": "A010", "area": "api-chat", "name": "FluentValidation", "description": "ChatRequest validator: non-empty messages, sessionId within length limits. 400 on invalid input.", "status": "passing" },
 
-    { "id": "A011", "area": "api-decomposition", "name": "propose_goals kernel function", "description": "Semantic Kernel function with typed ProposedGoal/ProposedTask parameters. Forces structured JSON output.", "status": "passing" },
+    { "id": "A011", "area": "api-decomposition", "name": "propose_goals tool function", "description": "AIFunction/MCP tool with typed ProposedGoal/ProposedTask parameters. Forces structured JSON output.", "status": "passing" },
     { "id": "A012", "area": "api-decomposition", "name": "Proposal SSE event", "description": "event: proposal with { goals: Goal[], tasks: Task[] } JSON payload when model calls propose_goals.", "status": "passing" },
 
     { "id": "A013", "area": "assistant-frontend", "name": "Assistant page", "description": "src/app/assistant/page.tsx — 'use client' chat interface with brain dump prompt.", "status": "passing" },
@@ -84,9 +84,9 @@
     { "id": "A015", "area": "assistant-frontend", "name": "AssistantChat component", "description": "src/components/AssistantChat.tsx — message list + input, streaming token display.", "status": "passing" },
     { "id": "A016", "area": "assistant-frontend", "name": "ProposalReview component", "description": "src/components/ProposalReview.tsx — edit goals/tasks inline, delete/add items, confirm writes to Supabase.", "status": "passing" },
 
-    { "id": "A017", "area": "api-mcp", "name": "MCP server setup", "description": "ModelContextProtocol.AspNetCore with HttpTransport. MomentumTools class.", "status": "failing" },
-    { "id": "A018", "area": "api-mcp", "name": "MCP tools: get_goals, get_tasks", "description": "Read tools querying Supabase via service-role key.", "status": "failing" },
-    { "id": "A019", "area": "api-mcp", "name": "MCP tools: create_goal, create_task, complete_task", "description": "Write tools mutating Supabase. brain_dump tool starts clarification flow.", "status": "failing" },
+    { "id": "A017", "area": "api-mcp", "name": "MCP server setup", "description": "ModelContextProtocol.AspNetCore with HttpTransport. MomentumTools class.", "status": "passing" },
+    { "id": "A018", "area": "api-mcp", "name": "MCP tools: get_goals, get_tasks", "description": "Read tools querying Supabase via user JWT passthrough for RLS.", "status": "passing" },
+    { "id": "A019", "area": "api-mcp", "name": "MCP tools: create_goal, create_task, complete_task", "description": "Write tools mutating Supabase. brain_dump tool starts clarification flow.", "status": "passing" },
 
     { "id": "A020", "area": "api-evals", "name": "Promptfoo config", "description": "api/evals/promptfooconfig.yaml with multiple providers (Claude Haiku/Sonnet, GPT-4o-mini/4o).", "status": "failing" },
     { "id": "A021", "area": "api-evals", "name": "Eval test cases", "description": "Test cases: simple-goal, multi-goal, vague-input, already-clear. Schema + question-count scorers.", "status": "failing" },

@@ -1,13 +1,18 @@
 {
-  "name": "Momentum Dev",
+  "name": "Claude Code Sandbox",
   "build": {
     "dockerfile": "Dockerfile",
     "args": {
-      "TZ": "${localEnv:TZ:Europe/London}",
+      "TZ": "${localEnv:TZ:America/Los_Angeles}",
       "CLAUDE_CODE_VERSION": "latest",
-      "NODE_VERSION": "20"
+      "GIT_DELTA_VERSION": "0.18.2",
+      "ZSH_IN_DOCKER_VERSION": "1.2.0"
     }
   },
+  "runArgs": [
+    "--cap-add=NET_ADMIN",
+    "--cap-add=NET_RAW"
+  ],
   "customizations": {
     "vscode": {
       "extensions": [
@@ -15,7 +20,8 @@
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
         "eamodio.gitlens",
-        "bradlc.vscode-tailwindcss"
+        "ms-dotnettools.csdevkit",
+        "ms-dotnettools.csharp"
       ],
       "settings": {
         "editor.formatOnSave": true,
@@ -25,38 +31,32 @@
         },
         "terminal.integrated.defaultProfile.linux": "zsh",
         "terminal.integrated.profiles.linux": {
-          "bash": { "path": "bash", "icon": "terminal-bash" },
-          "zsh": { "path": "zsh" }
-        },
-        "claude-code.dangerouslySkipPermissions": true
+          "bash": {
+            "path": "bash",
+            "icon": "terminal-bash"
+          },
+          "zsh": {
+            "path": "zsh"
+          }
+        }
       }
     }
   },
   "remoteUser": "node",
   "mounts": [
-    "source=momentum-bashhistory-${devcontainerId},target=/commandhistory,type=volume",
-    "source=momentum-claude-config-${devcontainerId},target=/home/node/.claude,type=volume",
-    "source=${localEnv:USERPROFILE}/.claude/.credentials.json,target=/home/node/.claude/.credentials.json,type=bind,readonly",
-    "source=${localEnv:USERPROFILE}/.claude/settings.json,target=/home/node/.claude/settings.json,type=bind,readonly",
-    "source=${localEnv:USERPROFILE}/.claude/plugins,target=/home/node/.claude/plugins,type=bind,readonly",
-    "source=${localEnv:USERPROFILE}/.claude/skills,target=/home/node/.claude/skills,type=bind,readonly",
-    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+    "source=claude-code-bashhistory-${devcontainerId},target=/commandhistory,type=volume",
+    "source=claude-code-config-${devcontainerId},target=/home/node/.claude,type=volume"
   ],
+  "forwardPorts": [11001, 5061],
   "containerEnv": {
     "NODE_OPTIONS": "--max-old-space-size=4096",
-    "CLAUDE_CONFIG_DIR": "/home/node/.claude"
+    "CLAUDE_CONFIG_DIR": "/home/node/.claude",
+    "POWERLEVEL9K_DISABLE_GITSTATUS": "true",
+    "DOTNET_ROOT": "/usr/share/dotnet",
+    "DOTNET_CLI_TELEMETRY_OPTOUT": "1"
   },
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",
   "workspaceFolder": "/workspace",
-  "runArgs": [
-    "--cap-add=NET_ADMIN",
-    "--cap-add=NET_RAW"
-  ],
-  "forwardPorts": [11001, 3000],
-  "postCreateCommand": "npm install",
   "postStartCommand": "sudo /usr/local/bin/init-firewall.sh",
-  "waitFor": "postStartCommand",
-  "features": {
-    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
-  }
+  "waitFor": "postStartCommand"
 }
