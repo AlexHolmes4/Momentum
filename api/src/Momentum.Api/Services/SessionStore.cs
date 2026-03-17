@@ -1,14 +1,14 @@
 using System.Collections.Concurrent;
-using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.Extensions.AI;
 
 namespace Momentum.Api.Services;
 
 public class SessionStore
 {
-    private readonly ConcurrentDictionary<string, ChatHistory> _sessions = new();
+    private readonly ConcurrentDictionary<string, List<ChatMessage>> _sessions = new();
     private readonly ConcurrentDictionary<string, SemaphoreSlim> _locks = new();
 
-    private const string SystemPrompt = """
+    public const string SystemPrompt = """
         You are a goal-setting assistant for Momentum, a personal productivity app.
         Your job is to help the user translate their thoughts into clear, trackable goals with linked tasks.
 
@@ -22,14 +22,12 @@ public class SessionStore
         7. Suggest target dates if the user mentioned timeframes
         """;
 
-    public ChatHistory GetOrCreate(string sessionId)
+    public List<ChatMessage> GetOrCreate(string sessionId)
     {
         return _sessions.GetOrAdd(sessionId, _ =>
-        {
-            var history = new ChatHistory();
-            history.AddSystemMessage(SystemPrompt);
-            return history;
-        });
+        [
+            new(ChatRole.System, SystemPrompt)
+        ]);
     }
 
     public SemaphoreSlim GetLock(string sessionId)
