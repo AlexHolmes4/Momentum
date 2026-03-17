@@ -1,71 +1,43 @@
 using System.Runtime.CompilerServices;
 using System.Text;
-using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.Extensions.AI;
 using Momentum.Api.Models;
-using Momentum.Api.Plugins;
 
 namespace Momentum.Api.Services;
 
-public class AssistantService
+public class AssistantService(IChatClient chatClient, SessionStore sessionStore)
 {
-    private readonly IChatCompletionService _chatService;
-    private readonly SessionStore _sessionStore;
-
-    public AssistantService(IChatCompletionService chatService, SessionStore sessionStore)
-    {
-        _chatService = chatService;
-        _sessionStore = sessionStore;
-    }
-
     public async IAsyncEnumerable<StreamChunk> StreamAsync(
-        ChatRequest request,
-        string userId,
-        [EnumeratorCancellation] CancellationToken cancellationToken)
+        ChatRequest request, string userId,
+        [EnumeratorCancellation] CancellationToken ct)
     {
         var sessionKey = $"{userId}:{request.SessionId}";
-        var sessionLock = _sessionStore.GetLock(sessionKey);
-        await sessionLock.WaitAsync(cancellationToken);
+        var sessionLock = sessionStore.GetLock(sessionKey);
+        await sessionLock.WaitAsync(ct);
+
         try
         {
-            var history = _sessionStore.GetOrCreate(sessionKey);
+            var history = sessionStore.GetOrCreate(sessionKey);
 
             // Only the last message is appended — server-side history is the source of truth.
             var lastMessage = request.Messages[^1];
-            history.AddUserMessage(lastMessage.Content);
+            history.Add(new ChatMessage(
+                new ChatRole(lastMessage.Role), lastMessage.Content));
 
-            // Build kernel with proposal plugin for function calling
-            var plugin = new GoalProposalPlugin();
-            var kernelBuilder = Kernel.CreateBuilder();
-            kernelBuilder.Services.AddSingleton(_chatService);
-            var kernel = kernelBuilder.Build();
-            kernel.Plugins.AddFromObject(plugin);
-
-            var settings = new PromptExecutionSettings
-            {
-                FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
-            };
-
-            // Stream the AI response
+            // Stream response
             var fullResponse = new StringBuilder();
-            await foreach (var chunk in _chatService.GetStreamingChatMessageContentsAsync(
-                history, settings, kernel, cancellationToken))
+            await foreach (var update in chatClient.GetStreamingResponseAsync(history, null, ct))
             {
-                var content = chunk.Content ?? string.Empty;
-                if (content.Length > 0)
+                if (update.Text is { Length: > 0 } text)
                 {
-                    fullResponse.Append(content);
-                    yield return StreamChunk.TextToken(content);
+                    fullResponse.Append(text);
+                    yield return StreamChunk.TextToken(text);
                 }
             }
 
-            // Append full assistant response to history
+            // Append assistant response to history
             if (fullResponse.Length > 0)
-                history.AddAssistantMessage(fullResponse.ToString());
-
-            // If the AI called propose_goals, yield the proposal
-            if (plugin.CapturedProposal != null)
-                yield return StreamChunk.GoalProposal(plugin.CapturedProposal);
+                history.Add(new ChatMessage(ChatRole.Assistant, fullResponse.ToString()));
         }
         finally
         {
